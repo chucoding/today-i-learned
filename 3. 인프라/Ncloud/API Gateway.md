@@ -1,5 +1,5 @@
 # API Gateway
-API 호출과 관련된 모든 작업을 편리하게 관리
+HTTP Request 요청을 받을 리소스 및 메서드를 생성하고, 비즈니스 로직 결과를 처리할 Cloud Functions의 Action과 연결시키켜 서버리스 서비스 구성 가능.
 
 ## 장점
 백엔드 서비스의 트래픽 제어  
