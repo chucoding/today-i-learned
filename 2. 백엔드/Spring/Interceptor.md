@@ -1,13 +1,63 @@
 # Interceptor
-TODO
+Controller를 호출하기 전과 후에 요청과 응답을 참조하거나 가공할 수 있는 일종의 필터  
+보통 로그인 체크, 권한 체크 등에 사용(세션 체크 로직을 각 Controller마다 넣어주지 않아도 된다는 장점이 있음:메모리 절약, 보안 강화)
+Interceptor는 spring-web 라이브러리(서블릿 기술)에 포함됨
 
-Interceptor 정리 잘되있음  
-https://kimvampa.tistory.com/127
+💡필터와의 차이점?  
+필터는 Servlet 컨테이너에서 요청과 응답을 가로채는 컴포넌트로, 컨테이너의 <b>DispatcherServlet 이전에 실행</b>, Interceptor는 DispatcherServlet 내부에서 실행된다.
 
 
-Interceptor 스프링 적용 에러  
-https://benfatto.tistory.com/14
+# 설정 방법
+servlet.xml 아래 다음과 같은 코드를 입력한다.
+```
+<interceptors>
+        <interceptor>
+            <mapping path="/admin"></mapping>
+            <bean class="com.example.www.interceptor.PageInterceptor"/>
+        </interceptor>
+</interceptors>
+```
+💡 위와 같이 안될 경우 namespace 확인해볼것.
+servlet.xml 맨 위 beans 설정 값을 확인해보면
+```
+xmlns:mvc="http://www.springframework.org/schema/mvc"
+```
+이런게 있으면 Interceptors 선언시 `mvc:`를 붙여줘야 한다.
+```
+<mvc:interceptors>
+    <mvc:interceptor>
+        <mvc:mapping path="/admin"></mapping>
+        <bean class="com.example.www.interceptor.PageInterceptor"/>
+    </mvc:interceptor>
+</mvc:interceptors>
+```
 
-HandlerInterceptorAdaptor 는 없어졌다?? - 확인해볼것
-  
-ChatGpt 정리하기
+# 구현 방법
+- 방법1 : HandlerInterceptor 인터페이스 구현
+- 방법2 : HandlerInterceptorAdaptor 추상 클래스 오버라이딩  
+※ HandlerInterceptorAdaptor: HandlerInterceptor를 상속받아서 구현됨(Adaptor를 사용하면 필요한 메서드만 가져다 사용할 수 있다는 장점이 있음.)
+
+```
+public class PageInterceptor implements HandlerInterceptorAdapter {
+	@Override
+	public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler)
+			throws Exception {
+		if (session.getAttribute("user_id") == null) {
+            response.sendError(HttpServletResponse.SC_NOT_FOUND); // 오류 전송
+            /* response.sendRedirect(request.getContextPath()); */ //루트 경로 이동하게 할 때 사용
+            return false; // 요청을 더 이상 진행하지 않고 종료
+        }
+        return true; // 요청을 계속 진행
+	}
+}
+```
+
+# 메소드 종류
+1. preHandle() : 컨트롤러가 호출되기 전에 실행됨.
+2. postHandle() : View가 생성되기 이전에 호출됨.
+3. afterCompletion() : 모든 작업이 완료된 후에 실행됨.
+![](https://github.com/chucoding/today-i-learned/assets/56211193/7f5c9c9b-4eda-4580-8ccc-7f1621a7bc7f)
+
+
+# 참고자료
+Interceptor란? https://kimvampa.tistory.com/127
