@@ -5,3 +5,6 @@
 |javascript, react|vscode|가볍고 많이 쓰인다, 무료이다.|
 |markdown|vscode|자동완성 기능이 편리하다.  (ex 링크 사용시 # 입력하면 헤더 목차 목록 나타남) |
 |java|eclipse|무료, 팀원들이 사용중<br/>vscode에 spring 프로젝트 사용하려면 확장자 덕지덕지 붙여야해서 결국은 이클립스만큼 무거워진다.(결국 돈만 있으면 인텔리제이가 짱)|
+
+# 폰트
+나눔스퀘어 Bold - PPT에 사용하면 깔끔
