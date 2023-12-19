@@ -30,21 +30,16 @@ if (str) {
 }
 ```
 
-!! - null, undefined, NaN, false
-! - 부정
+느낌표 두개 vs 느낌표 1개
+- !!(느낌표 두개) : null, undefined, NaN, false 체크
+- !(느낌표 1개) : 부정
 
-javascript 알면 좋은 문법들
-
-if(!!a) <= if(a !== null || undefined..
-
+```
 a = {}
 a?.name => undefined
 !!a?.name => false
-
-```jsx
-let origin = [a, b, c];
-let copy = [...origin]; //Spread Operator
 ```
+
 
 # 참고자료
 | TITLE         |URL|
