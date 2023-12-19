@@ -24,13 +24,9 @@ ES8(ES2017)
 # 문법
 
 ```jsx
-let str = data["slack.hooks"]
-if (str && str.includes(",")) { //str이 null 이라면??
-	//console.log(1) // 찍힐까?
-}
-
+let str = null;
 if (str) {
-	console.log(2) // 찍힐까?
+	console.log("str이 콘솔에 찍힐까?")
 }
 ```
 
