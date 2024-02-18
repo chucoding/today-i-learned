@@ -20,10 +20,38 @@ word-break: break-word;  /* Deprecated */
 ```css
 display: flex;
 ```
+
+### flex 속성
+- 부모 요소(Conteiner)
+    - flex-direction, flex-wrap, justify-content, align-items, align-content
+- 자식 요소 item
+    - flex, flex-grow, flex-shrink, flex-basis, align-self, order
 ### flex-direction
-row, column 중 선택하여 해당 축을 기준으로 일렬 배치
+row, column 중 선택하여 해당 축을 기준으로 일렬 배치(아이템의 정렬 방향을 설정)
 ```css
 flex-direction: row; /* default : row (가로로 배치)*/
+```
+### align-content
+아이템의 상하관계 정렬 상태를 설정
+
+```css
+align-content:flex-start;
+align-content:flex-end;
+align-content:center;
+align-content:space-between;
+align-content:space-around;
+align-content:stretch; /* default */
+```
+
+### align-item
+아이템의 내부 상하관계 정렬 상태를 설정
+
+```css
+align-items:flex-start;
+align-items:flex-end;
+align-items:center;
+align-items:baseline;
+align-items:stretch; /* default */
 ```
 
 ### Wrapping
@@ -33,8 +61,18 @@ TODO 공부.
 # Text-center
 글자 가운데로 오게 하는방법 정리
 
-### p태그
-p태그에 height가 잡혀있는 경우
+### 작은 레이아웃
+line-height, text-align 사용
 ```css
-line-height: 크기조정;
+height: 100px; 
+line-height: 50px; 
+text-align: center;
+```
+
+### 복잡한 레이아웃
+flexbox이용 (텍스트의 길이나 높이에 덜 민감)
+```css
+display: flex;
+align-items: center; /* 수직 가운데 정렬 */
+justify-content: center; /* 수평 가운데 정렬 */
 ```
