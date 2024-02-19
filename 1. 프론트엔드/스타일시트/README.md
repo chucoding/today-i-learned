@@ -43,7 +43,7 @@ align-content:space-around;
 align-content:stretch; /* default */
 ```
 
-### align-item
+### align-items
 아이템의 내부 상하관계 정렬 상태를 설정
 
 ```css
@@ -73,6 +73,10 @@ text-align: center;
 flexbox이용 (텍스트의 길이나 높이에 덜 민감)
 ```css
 display: flex;
-align-items: center; /* 수직 가운데 정렬 */
-justify-content: center; /* 수평 가운데 정렬 */
+align-items: center; /* main-axis의 cross-axis를 따라 정렬되는 방식 */
+justify-content: center; /* main-axis의 cross-axis를 따라 정렬되는 방식 */
 ```
+
+> ❗ justify-content와 overflow  
+> justify-content: center; 지정시 overflow했을때 왼쪽 화면이 잘릴 수 있음.  
+> 이 때는 justify-content: safe center를 사용하면 된다.(단, safari 지원안함.)
