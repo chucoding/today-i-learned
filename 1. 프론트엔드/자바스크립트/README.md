@@ -40,6 +40,14 @@ a?.name => undefined
 !!a?.name => false
 ```
 
+### 배열
+
+#### some()
+ 배열 요소 중 하나라도 주어진 조건을 만족하면 true를 반환
+```
+array.some(obj => obj.hasOwnProperty(key) && obj[key] === valueToCheck);
+```
+
 
 # 참고자료
 | TITLE         |URL|
