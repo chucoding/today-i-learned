@@ -64,3 +64,69 @@ public interface OrderServiceClient {
 4. 사용하는 곳에서 OrderServiceClient 생성자 주입 후 호출해서 사용
 
 ### 로그 추적 및 예외처리
+1. Feign Client인터페이스가 있는 client 패키지를 DEBUG 레벨로 설정
+```yaml
+logging:
+  level:
+    com.example.userservice.client: DEBUG
+```
+
+2. Application.java
+다음과 같이 feign 패키지에 속한 Logger를 반환값으로 빈 등록
+```java
+@Bean
+public Logger.Level feignLoggerLevel() {
+    return Logger.Level.FULL;
+}
+```
+
+3. 재시작 후 콘솔에서 다음과 같이 Feign client로 통신하는 Log 확인 가능
+```
+[OrderServiceClient#getOrders] ---> GET http://order-service/order-service/3b20b817-6b98-4995-8354-307f93095dfd/orders_ng HTTP/1.1
+[OrderServiceClient#getOrders] ---> END HTTP (0-byte body)
+[OrderServiceClient#getOrders] <--- HTTP/1.1 404 (187ms)
+```
+
+4. 예외처리 방법
+```java
+List<ResponseOrder> ordersList = null;
+try {
+    ordersList = orderServiceClient.getOrders(userId);
+} catch (FeignException ex) {
+    log.error(ex.getMessage());
+}
+```
+
+### ErrorDecoder를 사용한 예외처리
+일일이 try-catch로 예외처리 안해도 되고 status 별 오류메시지 전송이 가능하다는 장점이 있음.
+
+아래와 같이 error패키지를 만들고 ErrorDecoder를 구현하는 FeignErrorDecoder 클래스 생성
+```java
+@Component //Autowired 사용하려면 Component로 등록해야함.
+public class FeignErrorDecoder implements ErrorDecoder {
+
+    Environment env;
+
+    @Autowired 
+    public FeignErrorDecoder(Environment env) {
+        this.env = env;
+    }
+
+    @Override
+    public Exception decode(String methodKey, Response response) {
+        switch (response.status()) {
+            case 400:
+                break;
+            case 404:
+                if (methodKey.contains("getOrders")) {
+                    return new ResponseStatusException(HttpStatus.valueOf(response.status()),
+                            env.getProperty("order-service.exception.orders_is_empty"));
+                }
+                break;
+            default:
+                return new Exception(response.reason());
+        }
+        return null;
+    }
+}
+```
