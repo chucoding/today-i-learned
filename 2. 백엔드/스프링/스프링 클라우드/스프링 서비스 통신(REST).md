@@ -102,7 +102,7 @@ try {
 
 아래와 같이 error패키지를 만들고 ErrorDecoder를 구현하는 FeignErrorDecoder 클래스 생성
 ```java
-@Component //Autowired 사용하려면 Component로 등록해야함.
+@Component // Autowired 사용하려면 Component로 등록해야함.
 public class FeignErrorDecoder implements ErrorDecoder {
 
     Environment env;
