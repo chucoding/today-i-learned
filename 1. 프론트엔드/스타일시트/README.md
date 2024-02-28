@@ -1,5 +1,9 @@
 # CSS
 
+# position
+- absolute : 부모 요소면서 조상 요소 중 position속성이 static이 아닌 요소 기준
+- fixed : 뷰 포트(브라우저 창) 기준
+
 # Overflow
 오버플로우 처리방법 정리
 ### word-break;
