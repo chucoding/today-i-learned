@@ -37,4 +37,4 @@
 |title|url|
 |---|---|
 |플로우차트 정의|https://hello-woody.tistory.com/14|
-구글드라이브 - CBD
+|CBD|구글드라이브 참고|
