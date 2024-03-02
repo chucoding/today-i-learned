@@ -27,9 +27,18 @@ display: flex;
 
 ### flex 속성
 - 부모 요소(Conteiner)
-    - flex-direction, flex-wrap, justify-content, align-items, align-content
+    - flex-direction
+    - flex-wrap
+    - justify-content
+    - align-items
+    - align-content
 - 자식 요소 item
-    - flex, flex-grow, flex-shrink, flex-basis, align-self, order
+    - flex
+    - flex-grow
+    - flex-shrink
+    - flex-basis
+    - align-self
+    - order
 ### flex-direction
 row, column 중 선택하여 해당 축을 기준으로 일렬 배치(아이템의 정렬 방향을 설정)
 ```css
