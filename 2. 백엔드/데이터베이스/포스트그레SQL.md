@@ -1,6 +1,19 @@
 # Postgres
 대표적인 NoSQL기반 무료 데이터베이스
 
+# 타입
+|타입|설명|
+|---|---|
+|serial|자동 증가하는 정수 값|
+|text|가변 길이 텍스트|
+|varchat(n)|최대 길이가 n인 가변 길이 문자열|
+|integer|4바이트 정수|
+|timestamp|날짜와 시간|
+|date|날짜만 저장|
+|boolean|참/거짓|
+|json|json|
+|jsonb|이진 형태로 인코딩된 JSON(더 효율적이고 쿼리에 유리)|
+
 # 설치 방법
 
 ### ubuntu
