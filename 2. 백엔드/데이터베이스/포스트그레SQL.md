@@ -12,7 +12,23 @@
 |date|날짜만 저장|
 |boolean|참/거짓|
 |json|json|
-|jsonb|이진 형태로 인코딩된 JSON(더 효율적이고 쿼리에 유리)|
+|jsonb|이진 형태로 인코딩된 json|
+
+### json vs jsonb
+json
+- 처리 속도가 느리지만 원본 그대로 저장
+-  토큰 사이의 의미없는 공백도 모두 저장
+- 순서 보장
+- 중복키 보장
+
+jsonb
+- 인덱싱 지원
+- 공백 보존 X
+- 순서 보장 X
+- 중복키 x (마지막 키만 들어감)
+
+### text vs varchar
+mysql과 달리 postgres에서는 TOAST 저장소를 활용하기 때문에 큰 차이 없음.
 
 # 설치 방법
 
@@ -133,3 +149,4 @@ Environment=PGDATA=/path/data #참고로 이 data 폴더는 postgres 접근권�
 |---|---|
 |우분투 psql 설치 공식|https://www.postgresql.org/download/linux/debian/|
 |포스트그레 sql 완전 삭제방법|https://sunnys-note.tistory.com/5|
+|Text vs varchar|https://dev-scratch.tistory.com/172|
