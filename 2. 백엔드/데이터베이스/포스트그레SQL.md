@@ -144,6 +144,10 @@ Environment=PGDATA=/path/data #참고로 이 data 폴더는 postgres 접근권�
 ```
 변경 후 초기화 및 클러스터 생성부터 다시
 
+# qhrl
+systemctl list-units --type=service
+sudo journalctl -xeu postgresql@13-main.service
+
 # 참고자료
 |title|url|
 |---|---|
