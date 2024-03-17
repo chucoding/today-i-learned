@@ -30,6 +30,12 @@ jsonb
 ### text vs varchar
 mysql과 달리 postgres에서는 TOAST 저장소를 활용하기 때문에 큰 차이 없음.
 
+# 권한
+슈퍼유저 생성
+```postgresql
+CREATE USER <계정명> PASSWORD '<비밀번호>' SUPERUSER;
+```
+
 # 설치 방법
 
 ### ubuntu
