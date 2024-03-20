@@ -36,7 +36,7 @@ mysql과 달리 postgres에서는 TOAST 저장소를 활용하기 때문에 큰 
 CREATE USER <계정명> PASSWORD '<비밀번호>' SUPERUSER;
 ```
 
-# 설치 방법
+# 설치
 
 ### ubuntu
 1. 설치된 패키지가 있는지 확인(이미 설치되어있는데 다시 설치하는것을 방지)
@@ -88,6 +88,20 @@ systemctl start postgresql-13
 systemctl enable postgresql-13
 ```
 
+### 서비스 확인
+#### 명령 실행
+```shell
+systemctl list-units --type=service
+```
+
+#### 출력 결과
+- postgresql.service # PostgreSQL RDBMS (서버의 기본 인스턴스)
+- postgresql@13-main.service # PostgreSQL Cluster 13-main ( 메인 클러스터 )
+
+### 클러스터 재기동
+```
+sudo -u postgres pg_ctlcluster 13 main start
+```
 # 데이터베이스 접속 및 비밀번호 초기화
 
 1. postgres 접속
@@ -106,6 +120,7 @@ ALTER USER postgres WITH PASSWORD '새로운_비밀번호';
 # 또는
 \password postgres
 ```
+
 
 # 패스워드 자동화 사용
 .pgpass 파일을 만들어서 아래와 같이 입력한다. 단, .pgpass파일은 해당 계정 소유권한으로 만들어야함(root X)
