@@ -93,3 +93,6 @@ justify-content: center; /* main-axis의 cross-axis를 따라 정렬되는 방�
 > ❗ justify-content와 overflow  
 > justify-content: center; 지정시 overflow했을때 왼쪽 화면이 잘릴 수 있음.  
 > 이 때는 justify-content: safe center를 사용하면 된다.(단, safari 지원안함.)
+
+# diabled
+disabled 속성을 사용하면 cursor와 title 속성들을 사용할 수 없다.
