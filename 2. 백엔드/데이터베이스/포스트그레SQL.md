@@ -157,7 +157,6 @@ sudo vi /etc/postgresql/13/main/pg_hba.conf 아래와 같이 수정 후 서비�
 host    all             all             IP주소/0        md5
 ```
 
-
 # 저장소 변경 방법
 ```
 vi /usr/lib/systemd/system/postgresql-13.service
@@ -166,8 +165,30 @@ Environment=PGDATA=/path/data #참고로 이 data 폴더는 postgres 접근권�
 변경 후 초기화 및 클러스터 생성부터 다시
 
 # 포스트그레 서비스 조회
+```
 systemctl list-units --type=service
 sudo journalctl -xeu postgresql@13-main.service
+```
+
+# 클러스터 재기동
+모델 서버를 재기동하거나 예상치 못하게 장애가 발생하는 경우 클러스터는 postgres 계정으로 기동해야되기 때문에 다음과 같이 수동으로 재기동 명령어를 실행해야 한다.
+```
+sudo -u postgres pg_ctlcluster 13 main start
+```
+
+# 데이터 백업
+서버 이관작업이 예정되어 있거나 예기치 못한 장애 발생을 대비해 다음과 같이 백업을 진행할것.
+
+덤프
+```
+sudo -u postgres pg_dump -U postgres -d postgres -f konanllm_dump.sql
+```
+
+덤프 복원
+```
+sudo -u postgres createdb -U postgres konanllm
+sudo -u postgres psql -U postgres -d konanllm -p 65432 -f konanllm_dump.sql
+```
 
 # 참고자료
 |title|url|
