@@ -7,7 +7,7 @@ ES6(ES2015)
 - 모듈화 지원
 - 콜백 지옥에서 구원해줄 Promise의 등장
 - Default, Rest 파라미터
-- 해체 할당, Spread 연산자
+- Spread 연산자 (...object) ※ 키 값이 겹칠경우 뒤에 오는 순서로 적용된다.
 - 템플릿 리터럴
 
 ES7(ES2016)
