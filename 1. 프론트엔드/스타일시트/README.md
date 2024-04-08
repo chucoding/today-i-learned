@@ -95,4 +95,6 @@ justify-content: center; /* main-axis의 cross-axis를 따라 정렬되는 방�
 > 이 때는 justify-content: safe center를 사용하면 된다.(단, safari 지원안함.)
 
 # diabled
-disabled 속성을 사용하면 cursor와 title 속성들을 사용할 수 없다.
+disabled 속성을 사용하면 cursor와 title 속성들을 사용할 수 없다. 대신, 아래 속성들을 이용
+- style={{opacity : 0.5, cursor : not-allowed}}
+- title=사용할 수 없습니다.
