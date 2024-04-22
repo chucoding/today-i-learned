@@ -88,6 +88,7 @@ systemctl start postgresql-13
 systemctl enable postgresql-13
 ```
 
+
 ### 서비스 확인
 #### 명령 실행
 ```shell
