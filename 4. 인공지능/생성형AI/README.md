@@ -1,7 +1,7 @@
 # LLM
 Large Language Model
 
-### 모델 선택
+## 모델 선택
 허깅스페이스 리더보드에 나와있는 모델 중 지표가 가장 좋은 모델을 선택
 https://huggingface.co/spaces/lmsys/chatbot-arena-leaderboard
 
@@ -16,3 +16,7 @@ https://huggingface.co/spaces/lmsys/chatbot-arena-leaderboard
 
 #### 4. Claude-3.5_Sonnet
 - vertex AI에서 api사용가능?
+
+## 프롬프트 선택
+- openai 프롬프트 예제 : 
+https://platform.openai.com/docs/examples
