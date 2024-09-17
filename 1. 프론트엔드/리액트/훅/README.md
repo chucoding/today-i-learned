@@ -14,6 +14,11 @@ useEffect(() => {
 ## 3. useContext
 
 ## 4. useReducer
+컴포넌트에 reducer를 추가하는 React Hook
+-  useState와 매우 유사하지만, state 업데이트 로직을 이벤트 핸들러에서 컴포넌트 외부의 단일함수로 분리할 수 있다는 차이점이 있음
+```js
+const [state, dispatch] = useReducer(reducer, initialArg, init?)
+```
 
 ## 5. useRef
 
