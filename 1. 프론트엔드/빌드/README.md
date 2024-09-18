@@ -1,3 +1,14 @@
+# 프론트엔드 빌드
+
+### 탄생 배경
+브라우저에서 ESM(ES Module)을 지원하기 전까지, Javascript 모듈화를 네이티브 레벨에서 진행할 수 없었음. => 번들링(Bundling) 필요
+
+### 빌드 도구 종류
+- Webpack
+- Vite
+- Rollup
+- Parcel
+
 # JavaScript 패키지 매니저
 프로젝트의 종속성을 관리하는 도구
 
