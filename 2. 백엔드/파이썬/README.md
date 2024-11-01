@@ -146,14 +146,6 @@ class CustomClass:
 
 vscode - docstring generator 플러그인 설치
 
-# 설치
-|이름|설명|비고|
-|---|---|---|
-| Python | http://www.python.org/downloads/ | ※ 설치시 주의할점 Add Python 3.7 to PATH 체크 |
-| Anaconda | python miniconda 검색 | 파이썬 패키지 관리도구(ML 표준) |
-| VS Code | 파이썬 Extension 설치 |  |
-| JUPYTOR |  | 웹 기반 인터렉티브 코드 편집기의 표준 |
-
 # 실행
 
 설치파일을 실행시키면 ‘대화형 인터프리터(파이썬 쉘)’가 실행된다.
