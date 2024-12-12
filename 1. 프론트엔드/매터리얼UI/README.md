@@ -91,6 +91,40 @@ import MoreVertIcon from '@material-ui/icons/MoreVert';
 >💡 Ripple 효과   
 Android 5.0 (21) 머터리얼 디자인에 소개되었으며, 버튼을 클릭하였을때, 물결이 퍼지듯이 효과가 나오는 기능
 
+# 프로젝트 셋팅
+MUI 프로젝트 셋팅시 유용한 컴포넌트
+
+## CssBaseline
+브라우저 간의 일관된 스타일링을 위해 기본 CSS 리셋을 제공(normalize.css와 유사한 역할 수행)
+
+#### 사용 예시
+```jsx
+import { CssBaseline } from '@material-ui/core';
+
+<CssBaseline />
+```
+
+> 💡 사용시 적용되는 주요 스타일   
+margin제거, 기본배경색(다크모드포함), 폰트 
+
+> 💡 사용시 주의사항   
+ThemeProvider 컴포넌트 내부에서 사용해야함.
+
+## ThemeProvider
+MUI 테마를 적용하는 컴포넌트 (폰트 적용시 유용)
+
+#### 사용 예시
+```jsx
+import { ThemeProvider } from '@material-ui/core/styles';
+import { createTheme as createMuiTheme } from '@material-ui/core/styles';
+
+const theme = createMuiTheme({
+    typography: {
+        fontFamily: 'Pretendard',
+    },
+});
+```
+
 # 참고자료
 | TITLE            | URL                                                 |
 |------------------|-----------------------------------------------------|
