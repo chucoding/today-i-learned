@@ -1,6 +1,7 @@
 # MaterialUI (MUI)
 안드로이드 시스템에서 검증된 높은 수준의 디자인 퀄리티를 자랑하는 CSS 프레임워크
 
+# Custom CSS
 ### makeStyles
 - material UI v4에서 사용하는 HOC
 - 함수를 호출하여 스타일 객체를 생성 (함수 컴포넌트에서 사용하기 적합)
@@ -49,7 +50,7 @@ export default MyComponent;
 ### Styled API
 - Material-UI v5 부터는 styled API 사용 권장(makeStyles, withStyles 대체)
 
-### Select
+# Select
 Select 컴포넌트 v4에서 v5로 넘어가면서 수정사항이 많이 발생  
 v4
 ```
@@ -71,9 +72,27 @@ transformOrigin: {
 },
 ```
 
-### Grid
+# Icon
+
+### IconButton
+기본적으로 `Ripple` 효과가 적용되어 있음. 
+
+#### 사용 예시
+다음과 같이 아이콘을 Wrapping하여 사용 가능
+```jsx
+import { IconButton } from '@material-ui/core';
+import MoreVertIcon from '@material-ui/icons/MoreVert';
+
+<IconButton onClick={onClick}>
+    <MoreVertIcon fontSize='large' />
+</IconButton>
+```
+
+>💡 Ripple 효과   
+Android 5.0 (21) 머터리얼 디자인에 소개되었으며, 버튼을 클릭하였을때, 물결이 퍼지듯이 효과가 나오는 기능
 
 # 참고자료
 | TITLE            | URL                                                 |
 |------------------|-----------------------------------------------------|
 | MUI v4=>v5       | https://velog.io/@dlruddms5619/Migration-MUI-v4-to-v5-makeStyles-%EC%82%AC%EC%9A%A9%ED%95%98%EA%B8%B0   |
+| ripple 효과      | https://velog.io/@vov3616/Android-Ripple-%ED%9A%A8%EA%B3%BC-%EA%B5%AC%ED%98%84%ED%95%98%EA%B8%B0|
