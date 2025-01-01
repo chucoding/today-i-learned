@@ -58,23 +58,13 @@ class DatabaseConnection:
 #### 모듈 레벨 싱글톤 (Pythonic한 방법)
 ```
 class DatabaseConnection:
-    def __init__(self):
+    def __init__(self): # 생성자
         # 초기화 로직
         pass
 
 # 모듈 레벨에서 인스턴스 생성
 db_connection = DatabaseConnection()
 ```
-
-만약 첫 로드시에만 실행되는 코드가 있다면 다음과 같이 사용(FastAPI)
-```python
-@asynccontextmanager
-async def lifespan(app: FastAPI):
-    SchemaLoader()
-    yield
-```
-사용이유
-- 타이밍 보장 (애플리케이션이 완전히 시작되기 전에 초기화가 완료됨을 보장)
 
 
 #### FastAPI에서 설정 관리
@@ -97,3 +87,32 @@ settings = Settings()
 Pydantic의 BaseSettings는 이미 설정 관리를 위한 최적화된 방식을 제공
 
 환경 변수 로딩, 타입 검증, 기본값 설정 등의 기능이 내장되어 있어 별도의 싱글톤 패턴이 필요하지 않음.
+
+# 초기화 변수
+
+### lifespan
+컨텍스트 매니저 페턴을 사용하여 시작과 종료를 모두 관리(FastAPI 3.0부터 권장되는 방식)
+
+```python
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    SchemaLoader() # 시작 시 실행 코드 작성
+    yield
+    # 종료시 실행 코드 작성
+```
+
+아래는 엣날 방식 (startup, shutdown 분리)
+
+```python
+@app.on_event("startup")
+async def startup_event():
+    SchemaLoader()
+```
+
+lifespan 방식이 테스트 시 리소스 관리가 더 명확하고 쉬움, 특히 async 테스트에서 더 안정적
+
+> 💡 모듈 레벨 초기화 vs lifespan   
+> - 서버 초기화 시점을 명확하게 제어  
+> - 에러 처리가 용이
+> - 테스트 환경에서 모의 객체(mock)로 대체하기 쉬움
+
