@@ -6,21 +6,13 @@
 - 자동 문서화
 
 ## 프로젝트 구조
-일반적인 간단한 아키텍처1
-```
-|- app.py
-|- main.py
-|- models.py
-|- schemas.py
-|- utils.py
-|- tests/
-|- .env
-|- requirements.txt
-```
-
-일반적인 간단한 아키텍처2
+일반적인 간단한 아키텍처
 ```
 |- app/
+    |- main.py
+    |- models.py
+    |- schemas.py
+    |- utils.py
 |- tests/
 |- .env
 |- requirements.txt
