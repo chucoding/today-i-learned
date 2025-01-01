@@ -55,7 +55,10 @@ class DatabaseConnection:
 - 테스트 어려움
 - 비동기 환경에서 사용 불가
 
-#### 모듈 레벨 싱글톤 (Pythonic한 방법)
+#### 모듈 레벨 초기화(싱글톤) 
+- 애플리케이션이 실행하기 전에 로드되기 때문에 환경변수 설정할 때 많이 사용 (Pythonic한 방법)
+- 무거운 로직은 에러처리가 어렵기 때문에 lifespan에서 관리하는게 좋음
+- 가벼운 상수 등을 불러올 때 사용하면 좋음.
 ```
 class DatabaseConnection:
     def __init__(self): # 생성자
