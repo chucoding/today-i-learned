@@ -111,3 +111,60 @@ lifespan 방식이 테스트 시 리소스 관리가 더 명확하고 쉬움, �
 > - 에러 처리가 용이
 > - 테스트 환경에서 모의 객체(mock)로 대체하기 쉬움
 
+## 함수형 vs 클래스형
+### 함수형
+```python
+def init_vector_store():
+    store = InMemoryVectorStore(
+        ClovaXEmbeddings(
+            model='bge-m3',
+            api_key=settings.NCP_CLOVASTUDIO_API_KEY,
+            apigw_api_key=settings.NCP_APIGW_API_KEY,
+            app_id=settings.NCP_CLOVASTUDIO_APP_ID
+        )
+    )
+    # 초기 데이터 로드
+    store.add_documents(documents=load_schemas())
+    return store
+
+# main.py에서
+app.state.vector_store = init_vector_store()
+```
+### 클래스형
+```python
+class VectorStore:
+    def __init__(self):
+        self._store = None
+    
+    def load(self):
+        if self._store is None:
+            self._store = InMemoryVectorStore(
+                ClovaXEmbeddings(
+                    model='bge-m3',
+                    api_key=settings.NCP_CLOVASTUDIO_API_KEY,
+                    apigw_api_key=settings.NCP_APIGW_API_KEY,
+                    app_id=settings.NCP_CLOVASTUDIO_APP_ID
+                )
+            )
+            self._load_schemas()
+    
+    def search(self, query: str, k: int = 1):
+        if self._store is None:
+            raise RuntimeError("Store not initialized")
+        return self._store.similarity_search(query, k=k)
+    
+    def add_texts(self, texts: list[str]):
+        if self._store is None:
+            raise RuntimeError("Store not initialized")
+        return self._store.add_texts(texts)
+    
+    def cleanup(self):
+        if self._store:
+            self._store = None
+
+# main.py에서
+app.state.vector_store = VectorStore()
+app.state.vector_store.load()
+```
+
+> 💡 클래스형은 메모리 관리가 더 쉽고, 테스트 시 모의 객체(mock)로 대체하기 쉬움.(한꺼번에 에러 처리할 때도 용이)
