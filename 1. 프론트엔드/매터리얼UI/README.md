@@ -7,7 +7,7 @@
 - 함수를 호출하여 스타일 객체를 생성 (함수 컴포넌트에서 사용하기 적합)
 - React Hooks와 함께 사용할 수 있어서 더 현대적인 접근 방법
 - 성능면에서 withStyles보다 효율적
-- React 18에서 @mui/styles 대신 @mui/system을 사용해야함. (호환성 문제)
+- React 18에서 @mui/styles 대신 @mui/system 라이브러리의 syled API 을 사용하거나 emotion API를 사용해야함. (호환성 문제)
 
 ```jsx
 import { makeStyles } from '@mui/styles';
@@ -47,8 +47,8 @@ const MyComponent = withStyles(styles)(({ classes }) => (
 export default MyComponent;
 ```
 
-### Styled API
-- Material-UI v5 부터는 styled API 사용 권장(makeStyles, withStyles 대체)
+### Emotion or Styled API
+- Material-UI v5 부터는 Emotion API 또는 @mui/system 라이브러리의 syled API 사용 권장(makeStyles, withStyles 대체)
 
 # Select
 Select 컴포넌트 v4에서 v5로 넘어가면서 수정사항이 많이 발생  
