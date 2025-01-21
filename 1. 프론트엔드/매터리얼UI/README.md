@@ -47,8 +47,9 @@ const MyComponent = withStyles(styles)(({ classes }) => (
 export default MyComponent;
 ```
 
-### Styled API
-- Material-UI v5 부터는 styled API 사용 권장(makeStyles, withStyles 대체)
+### Emotion or Styled API
+- Material-UI v5 부터는 Emotion 또는 styled API 사용 권장(makeStyles, withStyles 대체)
+- @mui/system을 사용하면됨.
 
 # Select
 Select 컴포넌트 v4에서 v5로 넘어가면서 수정사항이 많이 발생  
