@@ -4,7 +4,42 @@
 # Custom CSS
 
 ### Emotion or Styled API
-- Material-UI v5 부터는 Emotion API 또는 @mui/system 라이브러리의 syled API 사용 권장(MUI v4의 makeStyles, withStyles 대체)
+- Material-UI v5 부터는 `Emotion` API 또는 `@mui/system` 라이브러리의 syled API 사용 권장(MUI v4의 `makeStyles`, `withStyles` 대체)
+
+### 사용 방법
+
+#### ✅ Styled API 사용 예시
+- MUI 내부 최적화가 적용되므로 성능상 이점이 있음(어차피 내부적으로 @emotion/react 사용중)
+```jsx
+import { styled } from '@mui/material/styles';
+
+
+const CustomButton = styled('button')({
+  backgroundColor: 'blue',
+  color: 'white',
+  padding: '8px 16px',
+});
+
+export default function App() {
+  return <CustomButton>버튼</CustomButton>;
+}
+```
+
+#### Emotion 사용 예시
+```jsx
+/** @jsxImportSource @emotion/react */
+import { css } from '@emotion/react';
+
+const buttonStyle = css`
+  background-color: blue;
+  color: white;
+  padding: 8px 16px;
+`;
+
+export default function App() {
+  return <button css={buttonStyle}>버튼</button>;
+}
+```
 
 # Icon
 
