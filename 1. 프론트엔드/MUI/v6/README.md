@@ -1,7 +1,16 @@
 # MaterialUI (MUI)
 안드로이드 시스템에서 검증된 높은 수준의 디자인 퀄리티를 자랑하는 CSS 프레임워크
 
-# Custom CSS
+## 컴포넌트
+### 레이아웃
+- Box : MUI 전용 div, 그룹핑할 때 사용 (div 쓰는게 더 안헷갈리고 좋음)
+- Container : 컨텐츠를 중앙에 배치
+- Stack : 리스트 나타낼때 유용
+
+### 표면
+- Card : 카드 형태의 UI (커스텀하기 어려워서 왠만하면 안쓰는게 좋음)
+
+## Custom CSS
 
 ### Emotion or Styled API
 - Material-UI v5 부터는 `Emotion` API 또는 `@mui/material/styles` 라이브러리의 syled API 사용 권장(MUI v4의 `makeStyles`, `withStyles` 대체)
@@ -41,7 +50,7 @@ export default function App() {
 }
 ```
 
-# Icon
+## Icon
 
 ### IconButton
 기본적으로 `Ripple` 효과가 적용되어 있음. 
@@ -60,10 +69,10 @@ import MoreVertIcon from '@material-ui/icons/MoreVert';
 >💡 Ripple 효과   
 Android 5.0 (21) 머터리얼 디자인에 소개되었으며, 버튼을 클릭하였을때, 물결이 퍼지듯이 효과가 나오는 기능
 
-# 프로젝트 셋팅
+## 프로젝트 셋팅
 MUI 프로젝트 셋팅시 유용한 컴포넌트
 
-## CssBaseline
+### CssBaseline
 브라우저 간의 일관된 스타일링을 위해 기본 CSS 리셋을 제공(normalize.css와 유사한 역할 수행)
 
 #### 사용 예시
@@ -79,7 +88,7 @@ margin제거, 기본배경색(다크모드포함), 폰트
 > 💡 사용시 주의사항   
 ThemeProvider 컴포넌트 내부에서 사용해야함.
 
-## ThemeProvider
+### ThemeProvider
 MUI 테마를 적용하는 컴포넌트 (폰트 적용시 유용)
 
 #### 사용 예시
@@ -93,6 +102,8 @@ const theme = createMuiTheme({
     },
 });
 ```
+
+
 
 # 참고자료
 | TITLE            | URL                                                 |
