@@ -10,7 +10,7 @@
 ### 표면
 - Card : 카드 형태의 UI (커스텀하기 어려워서 왠만하면 안쓰는게 좋음)
 
-## Custom CSS
+## 커스텀 스타일
 
 ### Emotion or Styled API
 - Material-UI v5 부터는 `Emotion` API 또는 `@mui/material/styles` 라이브러리의 syled API 사용 권장(MUI v4의 `makeStyles`, `withStyles` 대체)
@@ -34,6 +34,27 @@ export default function App() {
 }
 ```
 
+- v4 makeStyles과 비교하기
+  - 불필요한 보일러플레이트를 갖추고 있음.(훅 생성/호출) 
+```jsx
+import { makeStyles } from '@material-ui/core/styles';
+
+// 스타일 훅 생성
+const useStyles = makeStyles({
+  customButton: {
+    backgroundColor: 'blue',
+    color: 'white',
+    padding: '8px 16px',
+  }
+});
+
+export default function App() {
+  const classes = useStyles(); // 훅 호출
+  return <button className={classes.customButton}>버튼</button>;
+}
+```
+
+
 #### Emotion 사용 예시
 ```jsx
 /** @jsxImportSource @emotion/react */
@@ -50,7 +71,7 @@ export default function App() {
 }
 ```
 
-## Icon
+## 아이콘
 
 ### IconButton
 기본적으로 `Ripple` 효과가 적용되어 있음. 
