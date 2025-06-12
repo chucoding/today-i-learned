@@ -1,6 +1,6 @@
 # JPA
 
-pom.xml
+## Install
 ```xml
 <dependency>
     <groupId>org.springframework.boot</groupId>
