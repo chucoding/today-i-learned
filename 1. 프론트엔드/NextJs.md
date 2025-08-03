@@ -48,16 +48,24 @@ Google폰트 사용시
 
 빌드시 폰트 파일이 다운로드 되며 자체 호스팅되기 때문에 브라우저에서 따로 Google로 요청을 보내지 않는다.
 
-https://nextjs.org/blog/next-13#new-app-directory-beta
+# next/Image
+- lazy loading & 사이즈 최적화 & layout shift 방지
+- 외부 이미지 가져다 쓸때는 그냥 `<img>` 태그 사용하면됨.
 
-https://phrygia.github.io/react/2022-11-06-nextjs-13/
+```jsx
+import Image from 'next/image'
 
-[https://velog.io/@yoosion030/Next.js-13-정리](https://velog.io/@yoosion030/Next.js-13-%EC%A0%95%EB%A6%AC)
+export default function Home() {
+  return(
+    <Image src="/image.png"/>
+)} 
+```
 
+> 💡 이미지는 public vs src?    
+>  - public : 폰트, 동영상, PDF 등 변하지 않는 자산
+>  - src : 코드와 연관된 자산 (캐싱 방지, 빌드타임 최적화, width/height 자동 추론 기능)
 
 # 참고자료
-
----
 
 | TITLE | URL |
 | --- | --- |
