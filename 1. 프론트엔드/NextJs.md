@@ -1,16 +1,21 @@
 # NextJS
+리액트 서버사이드렌더링(Server Side Randering, SSR) 프레임워크
+
+- 검색앤진최적화(Search engine Optimization, SEO)
+- pages폴더로 라우팅
 - SSR 렌더링을 지원
-- 초기 렌더링 방식에서 리액트와 차이점을 보임
 
-### 장점
-- 폴더 경로가 곧 라우팅 경로로 처리 안해도됨.
-- 처음에는 SSR, 그 후에는 CSR 방식
+# 설치 및 초기 셋팅
+```powershell
+npx create-next-app
+```
 
-### 단점
+# Style
 - styled-jsx를 기본으로 지원하지만 코드 지저분해지는 단점이 있음
 ```
 <style jsx> </style>
 ```
+- tailwind 사용할것
 
 # next/script
 - script 태그를 사용하는것보다 조금 더 최적화된 사용이 가능하다.
@@ -48,6 +53,7 @@ https://nextjs.org/blog/next-13#new-app-directory-beta
 https://phrygia.github.io/react/2022-11-06-nextjs-13/
 
 [https://velog.io/@yoosion030/Next.js-13-정리](https://velog.io/@yoosion030/Next.js-13-%EC%A0%95%EB%A6%AC)
+
 
 # 참고자료
 
