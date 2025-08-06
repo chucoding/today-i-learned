@@ -65,6 +65,21 @@ export default function Home() {
 >  - public : 폰트, 동영상, PDF 등 변하지 않는 자산
 >  - src : 코드와 연관된 자산 (캐싱 방지, 빌드타임 최적화, width/height 자동 추론 기능)
 
+# next/navigation
+페이지 이동 모듈 
+
+### useParams
+- 동적 라우트의 경로 매개변수를 가져옴
+- `/post[id]` -> `{id: "123"}`
+
+### useSearchParam
+- URL의 쿼리 문자열 매개변수를 가져옴
+- `/posts?id=123` -> `{id: "123"}`
+
+### usePathname
+- 현재 페이지의 경로를 가져옴
+- `/posts/123`
+
 # 참고자료
 
 | TITLE | URL |
