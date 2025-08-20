@@ -45,7 +45,7 @@ export default defineConfig({
 
 ### Rollup Alias 설정 방법
 
-Vite에서는 `resolve.alias`를 통해 Rollup의 alias 기능을 사용할 수 있습니다:
+Vite에서 `resolve.alias`를 통해 Rollup의 alias 기능 사용가능
 
 ```ts
 // Vite에서 find/replacement 형태로 alias 설정
@@ -74,3 +74,33 @@ export default defineConfig({
 ```
 
 **참고**: Vite는 내부적으로 `@rollup/plugin-alias`를 사용하므로, 별도의 플러그인 설치 없이도 Rollup의 모든 alias 기능을 활용할 수 있습니다.
+
+### vite-tsconfig-paths
+alias를 설정하면 tsconfig 설정에도 똑같이 추가해줘야하는 번거로움이 있는데 이 때 `vite-tsconfig-paths`를 사용하면 tsconfig만 수정해도 vite 번들러에 동시 설정됨.
+
+```powershell
+yarn add vite-tsconfig-paths
+```
+
+tsconfig.json
+```json
+{
+    "compilerOptions": {
+        "paths": {
+            "@shared/*": ["src/shared/*"],
+            ...
+        }
+    }
+}
+```
+
+vite.config.ts
+```ts
+import { defineConfig } from 'vite';
+import react from '@vitejs/plugin-react-swc';
+import tsconfigPaths from 'vite-tsconfig-paths';
+
+export default defineConfig({
+    plugins: [tsconfigPaths(), react()]
+})
+```
