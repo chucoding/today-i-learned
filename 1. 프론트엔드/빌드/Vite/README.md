@@ -6,8 +6,9 @@
 
 ## Vite 장점
 - 빠른 개발 속도 : Native ESM을 이용해 소스 코드를 제공하여 변경된 코드만 HMR 적용됨... [참조](https://ko.vitejs.dev/guide/why)
+- 빠른 프로덕션 빌드
 
-💡 Vite의 번들링 변경
+> 💡 사실상 RollUp의 장점   
 > 이전에는 Go로 작성된 Esbuild를 사용하여 번들링하였으나, 최근에는 Rollup을 사용하여 번들링하는 것으로 변경됨. Esbuild가 더 빠르지만 앞으로 나올 Rolldown이 빌드 성능을 크게 향상시킬것
 
 ## vite 설정
