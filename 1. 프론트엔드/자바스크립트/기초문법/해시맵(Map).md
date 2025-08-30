@@ -20,3 +20,5 @@ map.delete("b");
 | --- | --- | --- |
 | 순회 | 순회가능(iterable) | Object는 iteration protocol을 구현하지 않기 때문에 for...of문을 사용하여 직접적으로 반복 불가능( Object.keys 또는 Object.entries 사용해야함.)
 | 성능 | 추가, 제거 성능 좋음 | 추가, 제거 최적화되지 않음 |
+
+## Map vs Set
