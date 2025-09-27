@@ -1,4 +1,4 @@
-# IdP(Indentity Provider)
+# 인증서비스(IdP: Indentity Provider)
 사용자의 신원(Identity)을 확인하고, 로그인/회원관리/권한/토큰 발급을 표준 프로토콜(OIDC/OAuth2) 로 처리해주는 인증 서버.
 
 ## 특징
@@ -15,7 +15,6 @@
 
 ### Keycloak = "자가 호스팅 IdP"
 오픈소스 IdP 서버 소프트웨어
-
 #### 장점
 - 무료(라이선스)
 - 커스터마이징 자유도 높음(테마, 프로토콜 확장, 브로커링 등)
