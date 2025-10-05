@@ -23,6 +23,10 @@ jobs:
             --only hosting,functions
 ```
 
+### environments
+배포 보호 규칙을 사용하여 환경을 만들고 해당 환경을 보호 (ex. production / staging )
+- public repo에서만 무료 사용 가능
+
 ### secrets
 
 #### 사용 제한
@@ -31,12 +35,11 @@ jobs:
 - organization secrets : 1000
 
 #### Repository secrets
-- 범위: 레포지토리 내 모든 워크플로/잡에서 사용 가능.
-- 사용법: secrets.MY_SECRET로 어디서나 참조.
+- 범위: 레포지토리 내 모든 워크플로/JOB에서 사용 가능.
+- 사용법: `secrets.MY_SECRET`로 어디서나 참조.
 - 보호: 일반 비밀값 보호만(로그 마스킹 등). 환경별 승인/대기 같은 추가 보호는 없음. 
 
 #### Environment secrets
 - 범위: 특정 환경(예: staging, production)로 한정.
-→ 잡에 environment: production 처럼 선언해야 해당 환경 시크릿/변수가 노출됨
+→ JOB에 `environment: production` 처럼 선언해야 해당 환경 시크릿/변수가 노출됨
 - 보호: 환경의 필수 리뷰어(승인), 대기 시간, 배포 브랜치 제한 같은 보호 규칙을 붙일 수 있어 배포 경로를 더 엄격하게 통제 가능.
-- public repo에서만 무료 사용 가능
