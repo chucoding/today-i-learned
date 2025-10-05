@@ -17,13 +17,49 @@
 - i18n 다국어 지원
 - 커스텀 헤더를 통해 CDN에서 웹 앱이 캐싱디는 방식을 관리
 
-## 배포
-### 초기화
+## 초기화
+
+### 진행 순서
 1. Firebase CLI 설치 `npm install -g firebase-tools`
 2. Firebase 프로젝트 만들기 및 앱 등록 (가이드 참고)
 3. Firebase 로그인 `firebase login`
 4. 프로젝트 초기화 `firebase init hosting`
 
-### 배포
+### 설정 파일(firebase.json)
+`firebase init hosting` 명령어 실행시 아래와 같이 설정 파일이 생성됨. 
+```json
+{
+  "hosting": {
+    "public": "public", // 배포할 디렉토리 지정(보통은 dist 또는 build)
+    "ignore": [ // 배포시 무시할 파일 지정
+      "firebase.json",
+      "**/.*",
+      "**/node_modules/**"
+    ],
+    "rewrites": [ // 404방지, URL 단축 등 설정
+      // 기본값 : 존재하지 않는 파일 또는 디렉터리에 대한 요청에 대해 index.html 제공
+      {
+        "source": "**",
+        "destination": "/index.html"
+      }
+    ]
+  }
+}
+```
+### 별칭 사용(.firebaserc)
+`firebase deploy --project prod` 와 같이 별칭 사용 가능
+
+```
+{
+  "projects": {
+    "default": "my-project-prod",
+    "prod": "my-project-prod",
+    "staging": "my-project-staging"
+  }
+}
+```
+
+
+## 배포
 1. 테스트 `firebase emulators:start`
 2. 배포 `firebase deploy` (롤백은 콘솔에서 가능)
