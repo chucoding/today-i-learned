@@ -17,8 +17,25 @@
 - i18n 다국어 지원
 - 커스텀 헤더를 통해 CDN에서 웹 앱이 캐싱디는 방식을 관리
 
-## 배포 방법
-1. Firebase CLI 설치
-2. 프로젝트 디렉터리 설정 `firebase init`
-3. 테스트 `firebase emulators:start`
-4. 배포 `firebase deploy` (롤백은 콘솔에서 가능)
+## 배포
+### 사전 작업
+1. Firebase CLI 설치 `npm install -g firebase-tools`
+2. Firebase 프로젝트 만들기 및 앱 등록 (가이드 참고)
+3. Firebase 로그인 `firebase login`
+3. 프로젝트 초기화 `firebase init hosting --skip-github`
+
+### 배포
+1. 테스트 `firebase emulators:start`
+2. 배포 `firebase deploy` (롤백은 콘솔에서 가능)
+
+## CI/CD
+Github action을 통해 Firebase Hosting CI 구성 가능
+
+### 주요 기능
+- 모든 PR에 대해 새로운 미리보기 채널 생성
+- (선택사항) PR이 병합될 때 Github 저장소의 현재 상태를 실시간 채널에 배포
+
+### 설정 방법
+1. Firebase 프로젝트에서 서비스 계정 생성(Firebase Console → 프로젝트 설정 → 서비스 계정)
+2. 서비스 계정 JSON 키 저장
+3. Github 레포지토리에서 secrets 생성
