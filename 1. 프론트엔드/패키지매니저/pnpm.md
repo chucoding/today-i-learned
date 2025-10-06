@@ -38,3 +38,16 @@ pnpm update vite@latest
 pnpm add     # 의존성 추가
 pnpm remove  # 의존성 삭제
 ```
+
+## Filtering
+모노레포 상황에서 특정 패키지로 명령을 제한
+
+### `pnpm -C <path>` 옵션과의 차이점
+- `-C` : 위치를 바꿔 실행
+- `--filter` : 위치는 그대로 두고 대상만 골라 실행
+
+### 결정 규칙
+- 정책/재사용 스크립트(build, test, lint 등): --filter 권장
+- 즉석·단발성·위치보정(특정 폴더에서만 한 번 실행): -C 선호
+- 둘 다 가능하지만 대상 여러 개를 다뤄야 함: -r + --filter 조합이 깔끔
+
