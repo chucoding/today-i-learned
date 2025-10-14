@@ -22,6 +22,11 @@ jobs:
             --project ${{ secrets.FIREBASE_PROJECT_ID }} \
             --only hosting,functions
 ```
+### 액션 종류
+- `pnpm/action-setup@v2` : Github Actions 실행 환경에 pnpm을 설치
+- `actions/setup-node@v4` : Node.js 환경을 설정하고 pnpm 캐시 활성화
+
+> 💡 node-version을 생략하면 GitHub Actions는 기본적으로 최신 LTS 버전을 사용
 
 ### environments
 배포 보호 규칙을 사용하여 환경을 만들고 해당 환경을 보호 (ex. production / staging )
