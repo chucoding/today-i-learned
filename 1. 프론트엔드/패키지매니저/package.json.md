@@ -1,4 +1,26 @@
 # package.json
+```json
+{
+  "name": "app",
+  "private": true,
+  "version": "2.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build"
+  },
+  "dependencies": {
+    ...
+  }
+}
+```
+> 💡 type: module
+> - ES 모듈(ESM) 방식으로 패키지를 처리
+>   - import/export 문법을 사용할 수 있음
+>   - .js 파일들이 ES 모듈로 해석됨
+> - 기본 값은 commonjs
+>   - require()/module.exports 문법 사용
+>   - Node.js의 전통적인 모듈 시스템
 
 ## 패키지 버전 관리
 
@@ -37,7 +59,7 @@
 "if-logger": "0.4.2",
 }`
 
-# 참고자료
+## 참고자료
 
 | TITLE            | URL                                                 |
 |------------------|-----------------------------------------------------|
