@@ -1,5 +1,16 @@
 # Vite
 
+## 설치
+https://ko.vite.dev/guide/
+```shell
+pnpm create vite
+```
+- Project name
+- Select a framework
+- Select a variant
+- Use rolldown-vite (Experimental)?
+- Install with pnpm and start now?
+
 ## 장점
 - 개발 서버 기동시간 단축
 - 빠른 HMR(Hot Module Replacement) - Native ESM을 이용해 변경된 모듈만 즉시 교체
