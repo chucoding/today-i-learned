@@ -28,3 +28,6 @@ https://www.ag-grid.com/javascript-data-grid/modules/
 >   - 순번
 >   - 엑셀 다운로드 기능 (csv만 무료 지원)
 >   - 대용량/온디멘드 로딩
+
+- 소계, 합계 + 정렬이 난이도가 있음.
+- 소계 커스텀시 체크박스 등 표현 애매해짐
