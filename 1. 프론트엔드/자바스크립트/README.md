@@ -33,10 +33,33 @@ if (str) {
 ```
 
 느낌표 두개 vs 느낌표 1개
-- !!(느낌표 두개) : null, undefined, NaN, false 체크
-- !(느낌표 1개) : 부정
+- !!(느낌표 두개) : 값을 boolean으로 변환 (truthy → true, falsy → false)
+- !(느낌표 1개) : 값을 boolean으로 변환한 후 부정 (truthy → false, falsy → true)
 
-```
+```javascript
+// !! (이중 느낌표) 예시
+!!null        // false
+!!undefined   // false
+!!NaN         // false
+!!false       // false
+!!0           // false
+!!""          // false (빈 문자열)
+!!"hello"     // true
+!!1           // true
+!!{}          // true
+
+// ! (단일 느낌표) 예시
+!null         // true
+!undefined    // true
+!NaN          // true
+!false        // true
+!0            // true
+!""           // true (빈 문자열)
+!"hello"      // false
+!1            // false
+!{}           // false
+
+// 옵셔널 체이닝과 함께 사용
 a = {}
 a?.name => undefined
 !!a?.name => false
