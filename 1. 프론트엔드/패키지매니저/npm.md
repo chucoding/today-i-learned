@@ -1,12 +1,19 @@
 # npm
-Node package manager(라이브러리 레지스트리)
-
-## 빌드
-```shell
-npm run build
-```
+Node Package Manager
 
 ## 명령어
+
+### 설치
+#### 로컬 설치
+```shell
+npm i
+```
+
+#### 글로벌 설치
+```
+npm i -g
+```
+
 CI/배포용 "엄격 설치" 모드
 ```shell
 npm ci
@@ -15,6 +22,10 @@ npm ci
 - package-lock.json과 완벽히 일치하는 버전만 설치하고, lock을 절대 수정하지 않음.
 - lock이 소스랑 안 맞으면 즉시 실패. 재현성/속도가 좋아서 CI에 많이 씀.
 
+### 빌드
+```shell
+npm run build
+```
 
 # npx
 npm(Node Package Module)의 5.2.0 버전부터 새로 추가된 도구
