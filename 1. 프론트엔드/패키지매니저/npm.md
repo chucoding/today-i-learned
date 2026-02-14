@@ -1,17 +1,24 @@
 # npm
 Node Package Manager
 
+## 특징
+- NodeJS 설치시 자동으로 같이 설치됨.
+- Corepack으로 사실상 대체 가능하지만 왠만하면 안지우는게 좋음.
+    - 어차피 Node 업데이트시 다시 설치되기도 하고 Corepack 재설치 할때도 npm이 필요함.
+
 ## 명령어
 
 ### 설치
 #### 로컬 설치
+프로젝트에 필요한 라이브러리 의존성 추가시 사용
 ```shell
-npm i
+npm i ...
 ```
 
 #### 글로벌 설치
+firebase-tools 등 초기 프로젝트 셋팅 용 CLI 도구 추가시 유용하게 사용(자동으로 환경변수 PATH에 경로가 셋팅되어 편리)
 ```
-npm i -g
+npm i -g ...
 ```
 
 CI/배포용 "엄격 설치" 모드
