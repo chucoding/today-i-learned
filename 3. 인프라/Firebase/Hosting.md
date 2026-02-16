@@ -1,5 +1,6 @@
 # Firebase Hosting
-정적 및 SPA 웹 앱 또는 PWA를 위한 빠르고 안전한 호스팅을 제공(Cloud Functions 또는 Cloud Run과 페어링하여 사용)
+정적 및 SPA 웹 앱 또는 PWA를 위한 빠르고 안전한 호스팅을 제공
+- Cloud Functions 또는 Cloud Run과 페어링하여 사용
 
 > SSR, Next.js앱을 빌드하려면 Firebase App Hosting 사용
 
@@ -46,10 +47,19 @@
   }
 }
 ```
-### 별칭 사용(.firebaserc)
-`firebase deploy --project prod` 와 같이 별칭 사용 가능
+### 프로젝트 연결 설정(.firebaserc)
+로컬 디렉터리가 **어떤 Firebase 프로젝트와 연결되어 있는지** 저장하는 프로젝트 설정 파일.  
+- `firebase init` 시 선택한 프로젝트가 `default`로 저장됨.  
+- **default가 있으면 `firebase deploy`만 실행해도 해당 프로젝트로 배포됨** (`--project` 옵션 불필요).
+- 여러 프로젝트(prod, staging 등)를 **별칭(alias)** 으로 등록해 두었다면, default가 아닌 프로젝트로 배포할 때만 `--project` 옵션 사용. (`firebase use --add`로 별칭 추가 가능)
 
+```bash
+firebase deploy                    # default 프로젝트로 배포
+firebase deploy --project staging # staging 별칭 프로젝트로 배포
 ```
+
+`.firebaserc` 예시:
+```json
 {
   "projects": {
     "default": "my-project-prod",
