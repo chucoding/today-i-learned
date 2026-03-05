@@ -36,3 +36,16 @@
 #### 단점
 - 더 많은 개발 필요.
 - 마크업, 테마, 스타일 제공되지 않음.
+
+## 비교
+2026년 기준 Top4
+
+### 1. TanStack Table
+### 2. AG Grid
+### 3. MUI Data Grid
+#### 단점
+Pro 기능 유료.
+### 4. Material React Table
+Material UI v6 + TanStack Table v8 조합(MRT v3 기준)
+#### 단점
+ColSpan, RowSpan 지원 안함.
