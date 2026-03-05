@@ -1,7 +1,7 @@
 # Table
 
 ## 개요
-테이블/데이터그리드 컴포넌트 개발 방법론 정리
+테이블/데이터그리드 디자인시스템 및 컴포넌트 개발 방법론 정리
 
 ## 설계
 테이블/데이터그리드 라이브러리 생태계에는 크게 다음과 같이 두 가지 범주가 있음.
@@ -49,3 +49,49 @@ Pro 기능 유료.
 Material UI v6 + TanStack Table v8 조합(MRT v3 기준)
 #### 단점
 ColSpan, RowSpan 지원 안함.
+
+## 디자인시스템
+일반적으로 3-Layer 패턴 사용.
+
+### Layer 1 - DS Core
+가볍고 안정적인 공통 컴포넌트로 구성
+
+#### 구성 요소
+- Primitives : Table, Thead, Tbody, Tr, Th, Td
+- hover, selected, focus, density, stickyHeader 같은 룩앤필(시각적 규칙)
+- 접근성 최소치(예: aria-sort 표시 규칙 등)
+
+#### 포인트
+- 이 레이어는 TanStack Table 같은 로직 의존이 없어도 됨.
+- 버전업/릴리즈를 가장 안정적으로 가져갈 수 있는 영역
+
+### Layer 2 - DS Pattern / Kit
+조립 가능한 패턴 부품(디자인시스템 안에 서브 엔트리로 분리)  
+ex. @rsquare/ds/data-table-kit
+
+#### 구성 요소
+- SortableHeader
+- TableToolbar (검색/필터 슬롯)
+- Pagination
+- ColumnVisibilityMenu
+- EmptyState, LoadingState
+- RowSelectionCheckbox (단, 로직은 바깥에서 주입)
+
+#### 포인트
+- TanStack Table에 강하게 묶이지 않게 props를 설계
+  - ex. sortDirection, onSortChange 같은 표준 이벤트/상태 인터페이스로 받기
+- TanStack 객체(header, column)를 그대로 props로 받지 않는 쪽이 커플링이 덜함
+- DS 안에서 개발 속도를 올리되, 완제품 DataGrid까지는 가지 않는 레이어
+
+### Layer 3 - Product-level DataGrid
+무겁고 도메인 의존
+
+#### 구성 요소
+- @tanstack/react-table + @tanstack/react-query + @tanstack/react-virtual까지 엮인 완제품 <DataTable/>
+- 서버 페이징/정렬/필터
+- 사용자별 컬럼 설정 저장(localStorage/DB)
+- export, inline edit 같은 “관리자 도메인” 기능
+
+#### 포인트
+- 여기서 커플링이 터지는 게 정상. 그래서 DS 바깥이 유지보수에 유리
+- DS는 “재료(레이어1) + 조립부품(레이어2)”까지만 책임지고, 레이어3은 앱/도메인에서 책임.
