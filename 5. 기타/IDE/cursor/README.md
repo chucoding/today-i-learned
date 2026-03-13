@@ -10,7 +10,8 @@
 ## Agent Modes
 
 ### Agent
-- 구현 작업
+- 코드 작성할 때 주로 사용
+- Windows에서는 실행할 때 보통 PowerShell을 사용
 
 ### Ask
 - 중간 설계 질문시 사용
