@@ -2,7 +2,7 @@
 기능 분할 설계(Feature-Sliced Design, FSD) 아키텍처 
 
 - segments 종류 : ui, model, api, lib, config
-- AI 시대에는 “Vertical Slice / Feature 중심 구조”가 가장 잘 맞는다
+- AI 시대에 적합 (Vertical Slice / Feature 중심 구조)
 
 
 ```
