@@ -20,7 +20,26 @@
 ## Segments
 App, Shared slices로 구성
 
+## 타입
+타입은 slice별로 `model/types.ts`에 두고, 필요 시 `model/types/` 폴더로 분리한다.
 
+### API·도메인 타입
+- 서버 API Request/Response, 도메인 엔티티 타입은 **slice의 `model/types.ts`**에 정의한다.
+- 필요 시 `model/types/` 폴더로 파일을 나눌 수 있다.
+- (아래 프로젝트 구조의 `types.ts` 주석 참고)
+
+### 컴포넌트 props·context
+- **원칙:** 해당 컴포넌트(또는 context)가 정의된 **같은 파일 상단**에 선언한다. (공동위치)
+- **예외:** Vue/Svelte처럼 같은 파일에 둘 수 없거나, 여러 컴포넌트에서 props 타입을 공유할 때는 **같은 폴더(보통 `ui`)**에 별도 파일로 둔다. (예: `RecentActionsProps.ts`)
+
+### 상수·리터럴 타입
+- `as const` 리터럴 타입·enum·상수 관련 타입은 **해당 상수가 정의된 파일**에 함께 둔다.
+- 예: 도메인 고정값 타입은 `model/consts.ts`에, enum은 용도에 따라 `api` 또는 `ui` 세그먼트의 사용처 근처에 정의한다.
+
+### 참고 (FSD 공식)
+- [Types \| Feature-Sliced Design](https://feature-sliced.design/docs/guides/examples/types): 타입 배치, DTO/매퍼, props·context 타이핑, enum 등 정리됨.
+
+## 프로젝트 구조
 ```
 |- node_modules       
 |- public
