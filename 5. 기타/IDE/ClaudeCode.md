@@ -42,6 +42,7 @@ claude --permission-mode plan
 4. 후속 질문과 계획 보정
 초안이 나온 뒤에도 바로 실행으로 넘어가는게 아니라 사용자가 후속 질문을 통해 계획을 더 다듬을 수 있음 
 
+## 모델
 ### opusplan
 ```claude-cli
 /model opusplan
@@ -51,6 +52,7 @@ Plan mode에서는 Opus, Execution mode에서는 Sonnet으로 자동 전환
 - Max/Team Premium인 경우 기본 Opus 4.6
 - Pro/Team Standard는 Sonnet 4.6
 - Opus 사용 임계치에 걸리면 Sonnet으로 자동 폴백
+- effort는 각각 설정한 값에 따라 
 > https://code.claude.com/docs/en/model-config
 
 ## Claude Code for Cursor
