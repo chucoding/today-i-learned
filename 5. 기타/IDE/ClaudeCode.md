@@ -38,34 +38,20 @@ claude --permission-mode plan
 - 요구사항이 정리되면 Claude는 읽기 전용 도구로 관련 파일과 구현 패턴을 조사.
 - Plan 서브에이전트가 맥락 수집을 맡음(쓰기/수정 도구 없이 동작 - haiku)
 3. 계획 초안 수립
-- 조사 결과를 바탕으로 Claude는 어떤 방식으로 구현할지, 어느 영역이 영향을 받는지, 어떤 순서로 진행하는 게 안전한지를 정리해 계획 초안을 구성
+- 조사 결과를 바탕으로 어떤 방식으로 구현할지, 어느 영역이 영향을 받는지, 어떤 순서로 진행하는 게 안전한지를 정리해 계획 초안을 구성
 4. 후속 질문과 계획 보정
-초안이 나온 뒤에도 바로 실행으로 넘어가는게 아니라 사용자가 후속 질문을 통해 계획을 더 다듬을 수 있음 
+- 초안이 나온 뒤에 바로 실행으로 넘어가는게 아니라 사용자가 후속 질문을 통해 계획을 더 다듬을 수 있음 
 
 ## 모델
 ### opusplan
+Plan mode => Opus / Execution mode => Sonnet 자동 전환
+
 ```claude-cli
 /model opusplan
 ```
-Plan mode에서는 Opus, Execution mode에서는 Sonnet으로 자동 전환
 - 계정티어에 따라 default 모델 다름
 - Max/Team Premium인 경우 기본 Opus 4.6
 - Pro/Team Standard는 Sonnet 4.6
 - Opus 사용 임계치에 걸리면 Sonnet으로 자동 폴백
 - effort는 각각 설정한 값에 따라 
 > https://code.claude.com/docs/en/model-config
-
-## Claude Code for Cursor
-Cursor 터미널에서 claude 실행시 Cursor extension이 CLI를 감지해서 IDE bridge를 연결
-
-> Welcome to Claude Code for Cursor installed extension v2.1.72
-
-### 장점
-- Claude가 수정하면 Cursor 에디터에 diff 표시
-- commit / diff를 IDE UI로 표시
-
-### 단점
-- 컨텍스트 공유 안됨
-  - (ex. 에디터에서 열린 파일들, cursor 채팅 등)
-
-## VSCode Extension
