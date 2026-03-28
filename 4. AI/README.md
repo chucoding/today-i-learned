@@ -1,10 +1,15 @@
-# 인공지능
+# AI
 
-## Open-domain Conversation(Chitchat)
-- GPT-3 등
-- 자연스러운 대화 생성 능력
-- 특정 Domain에 특화된 Chatbot
+## Best Practice
 
-## Open-domain QA System
-- 다양한 주제의 질문에 대해 문서 집합으로부터 적절한 정보를 찾아 답변을 구해주는 시스템
-- 특정 Domain에 특화된 QA system
+### 리팩토링
+- Aider 계열 편집·리팩토링 지표 : GPT-5.4
+- 장시간·대규모 코드베이스 작업 : Opus 4.6
+- 리팩토링 전용 벤치마크 : SWE-Refactor
+  - GPT-5.4, Opus 4.6 공개 결과 없음.
+- repo-level code editing 벤치마크 : SWE-bench Verified
+  - Claude Opus 4.6 : 78.7% ±1.9
+  - GPT-5.4(high) : 76.9% ±1.9
+  - Gemini 3.1 Pro Preview : 75.6% ±2.0
+  - OpenAI는 2026년 2월에 SWE-bench Verified가 오염되고 있다고 주장(새로운 벤치마크로 테스트)
+> [벤치마크 결과](https://lmcouncil.ai/benchmarks)
