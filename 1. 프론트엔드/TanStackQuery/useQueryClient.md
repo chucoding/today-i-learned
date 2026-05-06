@@ -10,7 +10,7 @@
 3. **검색 결과** : 검색어 입력 중 관련 데이터 미리 로드
 4. **모달/팝업** : 모달 열기 전 데이터 미리 준비
 
-```js
+```ts
 function UserProfile({ userId }) {
   const queryClient = useQueryClient()
   
@@ -29,3 +29,7 @@ function UserProfile({ userId }) {
   return <div>{user?.name}</div>
 }
 ```
+
+## useQuery
+enabled
+- 실행조건
