@@ -1,7 +1,5 @@
 # React Hook Form
-불필요한 재렌더링을 제거하는 동시에 작성해야 하는 코드 양을 줄여주는 라이브러리
-
-https://react-hook-form.com/
+> React Hook Form 공식 문서 : [React Hook Form](https://react-hook-form.com/)
 
 ## 특징
 - 전체 폼을 다시 렌더링하지 않고도 개별 입력 및 폼 상태 업데이트를 구독
@@ -318,3 +316,56 @@ function FieldArray() {
 - `fields`: 렌더링 가능한 필드 배열 (각 항목에 고유한 id 포함)
 - `append`, `remove`: 필드 추가 및 삭제 함수
 - `register`: 각 필드에 등록
+
+## shouldUnregister
+컴포넌트가 unmount될 때 해당 필드를 폼 상태에서 제거할지 결정하는 옵션
+> 특정 조건에 따라 필드를 보여주거나 숨김(ex. 드롭다운 '기타' 추가 입력란)
+
+기본값 : false (true : 언마운트된 필드는 폼에서 완전히 사라지고 검증 대상에서도 제외)
+
+### Zod 연동시 주의사항
+React Hook Form과 Zod는 서로 다른 기준으로 동작
+
+- React Hook Form : 언마운트된 필드를 실제 폼 상태(state)에서 제거
+- Zod : 검증할 때 정의된 스키마 전체를 기준으로 동작
+
+=> 즉, shouldUnregister를 true로 설정해놓아도 검증 시도
+
+### Zod 연동시 해결 방법
+1. discriminatedUnion (추천)
+- 타입 안전성이 확실히 보장됨
+- 스키마만 봐도 어떤 조건에서 어떤 필드가 필요한지 명확함
+- 서버 스펙과 일치하여 디버깅이 쉬움
+
+```ts
+const schema = z.discriminatedUnion('type', [
+    // type이 'basic'일 때
+    z.object({
+        type: z.literal('basic'),
+        // extra 필드 자체가 스키마에 없음
+    }),
+
+    // type이 'extra'일 때
+    z.object({
+        type: z.literal('extra'),
+        extra: z.string().min(1, '필수 입력입니다'),
+    }),
+]);
+
+const form = useForm({
+    resolver: zodResolver(schema),
+    shouldUnregister: true,
+    defaultValues: {
+        type: 'basic',
+        extra: '', // 기본값은 넣어도 됨
+    }
+});
+```
+type이 basic일때는 extra 필드가 아예 스키마에 존재하지 않음.
+
+2. refine/superRefine
+- 정말 복잡한 다중 필드 의존성이 있는 경우
+- 식별자 필드를 만들기 어려운 특수한 상황
+
+## 참고자료
+[왜 shouldUnregister: true인데 검증 에러가 발생할까?](https://toby2009.tistory.com/83#shouldUnregister%EB%8A%94%20%EB%AC%B4%EC%97%87%EC%9D%B8%EA%B0%80%3F-1-1)
