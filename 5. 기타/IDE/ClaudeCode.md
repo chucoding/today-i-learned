@@ -54,4 +54,5 @@ Plan mode => Opus / Execution mode => Sonnet 자동 전환
 - Pro/Team Standard는 Sonnet 4.6
 - Opus 사용 임계치에 걸리면 Sonnet으로 자동 폴백
 - effort는 각각 설정한 값에 따라 
+- VS Code 플러그인에서 미지원
 > https://code.claude.com/docs/en/model-config
