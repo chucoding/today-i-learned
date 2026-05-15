@@ -50,3 +50,12 @@ gstack github README 참고
 권장 사항: 내일 가장 좁은 부분을 배포하고 실제 사용으로부터 배우세요.
 전체 비전은 3개월 프로젝트입니다 — 실제로 작동하는 일일 브리핑으로 시작하세요.
 ```
+
+## 제거
+gstack github README 참고
+> [gstack github](https://github.com/garrytan/gstack)
+
+단, 깔끔하게 안지워짐. 스킬 및 CLAUDE.md 직접 제거 필요.
+- ~/.agents/skills/: gstack 스킬 45개 제거, feature-sliced-design, find-skills, grill-me, security-best-practices 유지
+- ~/.claude/skills/: 동일하게 정리
+- ~/.claude/CLAUDE.md: # gstack 섹션 전체 제거 (파일 비어 있음)
