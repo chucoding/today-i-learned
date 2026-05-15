@@ -6,7 +6,6 @@ Y Combinator의 CEO인 Garry Tan의 오픈소스 시스템으로, Claude Code를
 - 각 스킬이 곧 전문가(CEO, 엔지니어, 디자이너 등등)
 
 ## 동작
-스프린트 구조
 ```
 생각 → 계획 → 구축 → 검토 → 테스트 → 배포 → 회고
 ```
@@ -21,7 +20,18 @@ Y Combinator의 CEO인 Garry Tan의 오픈소스 시스템으로, Claude Code를
 8. `/ship` 실행 (PR 푸시)
 
 ## 설치
-[gstack github README 참고](https://github.com/garrytan/gstack)
+gstack github README 참고
+> [gstack github](https://github.com/garrytan/gstack)
+- claude desktop기반 프롬프트 설치
+- PRO 요금제 기준 2% 정도 사용
+
+설치 완료
+- bun 설치 완료 (필수 의존성)
+- `~/.claude/skills/gstack` 경로에 gstack 클론 및 설정 완료 — Playwright/Chromium 헤드리스 브라우저 포함
+- `~/.claude/CLAUDE.md` 파일 생성 및 gstack 섹션 추가 완료:
+모든 웹 브라우징에는 /browse 사용, mcp__claude-in-chrome__* 도구는 절대 사용하지 않음, 그리고 사용 가능한 전체 스킬 목록 포함
+
+
 
 ## 각 스킬별 상세 설명
 ### 1. `/office-hours` - 오피스 아워(파트너)
