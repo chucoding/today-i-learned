@@ -1,7 +1,18 @@
-# MCP
-앤트로픽(Anthropic)이 새로운 오픈소스 표준인 모델 컨텍스트 프로토콜(Model Context Protocol, MCP) 공개
+# MCP(Model Context Protocol)
+앤트로픽(Anthropic)이 새로운 오픈소스 표준인 모델 컨텍스트 프로토콜
 
-- 클라이언트-서버 아키텍처 기반
-  - 호스트 : LLM 애플리케이션
-  - 클라이언트 : 호스트 애플리케이션 내에서 서버와 1:1 연결 유지
-  - 서버 : 클라이언트에 컨텍스트, 도구, 프롬프트 제공
+## 구조
+클라이언트-서버 아키텍처 기반
+- 호스트 : LLM 애플리케이션
+- 클라이언트 : 호스트 애플리케이션 내에서 서버와 1:1 연결 유지
+- 서버 : 클라이언트에 컨텍스트, 도구, 프롬프트 제공
+
+## 설정
+### codex
+`~/.codex/config.toml` 파일에 MCP 서버 등록.
+
+#### 예시
+```toml
+[mcp_servers.atlassian]
+url = "https://mcp.atlassian.com/v1/mcp"
+```
