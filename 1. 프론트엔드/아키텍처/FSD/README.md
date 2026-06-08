@@ -38,7 +38,10 @@
 | **Shared** | 앱 기본 구성요소, 재사용 기반 코드 | slice 없이 segment만 |
 
 ## Segments
-App, Shared는 slice 없이 segment로만 구성. 세그먼트는 **목적**으로 이름 짓는다 (예: ui, api, model, lib, config).
+Segement는 본질(무엇인지)이 아닌 목적(왜)을 설명해야함. 
+> - components, hooks, modals, assets (x)
+>   - 파일들이 무엇인지는 설명하지만 내부 코드를 탐색하는 데 도움 안됨.
+> - App, Shared는 slice 없이 segment로만 구성. 
 
 - **ui**: UI 컴포넌트, 포맷터, 스타일 등
 - **api**: 백엔드 통신, request, DTO, mapper
