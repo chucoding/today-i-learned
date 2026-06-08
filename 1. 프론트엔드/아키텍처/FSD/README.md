@@ -43,7 +43,8 @@ Segement는 본질(무엇인지)이 아닌 목적(왜)을 설명해야함.
 >   - 파일들이 무엇인지는 설명하지만 내부 코드를 탐색하는 데 도움 안됨.
 > - App, Shared는 slice 없이 segment로만 구성. 
 
-- **ui**: UI 컴포넌트, 포맷터, 스타일 등
+- **ui**: UI 컴포넌트, 포맷터, 스타일, 아이콘 등
+  - 아이콘은 `import HcLogo from @../hc-logo.svg?react`와 같이 평탄화하여 컴포넌트로 사용 가능
 - **api**: 백엔드 통신, request, DTO, mapper
 - **model**: 도메인 모델, 스키마, 스토어, 비즈니스 로직
 - **lib**: 해당 슬라이스 전용 라이브러리 코드
