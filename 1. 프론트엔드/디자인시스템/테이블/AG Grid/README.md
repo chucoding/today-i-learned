@@ -8,7 +8,7 @@ https://www.ag-grid.com/react-data-grid/getting-started/
 ```shell
 npm install ag-grid-react
 ```
-ag-grid-react 설치 시 ag-grid-community도 함께 설치됨.
+> ag-grid-react 설치 시 ag-grid-community도 함께 설치됨.
 
 ### 2. 모듈 등록
 > [모듈 등록 가이드문서](https://www.ag-grid.com/javascript-data-grid/modules/)
@@ -32,5 +32,5 @@ ModuleRegistry.registerModules([AllCommunityModule]);
 |소계(그룹 합계)|X|O||
 |순번|X|O||
 |엑셀 다운로드 기능|X(CSV만 무료 지원)|O||
-|체크박스|O(소계 커스텀 구현시 사용 불가)|O||
+|체크박스|O|O|https://www.ag-grid.com/react-data-grid/row-selection-multi-row/|
 |아코디언|X|O|https://www.ag-grid.com/react-data-grid/grouping-opening-groups/|
