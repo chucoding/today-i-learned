@@ -1,14 +1,15 @@
-# React Hook Form
+# React Hook Form(RHF)
 > React Hook Form 공식 문서 : [React Hook Form](https://react-hook-form.com/)
 
-## 특징
-- 전체 폼을 다시 렌더링하지 않고도 개별 입력 및 폼 상태 업데이트를 구독
-- 빠른 마운트
-- 상태관리에 의존하지 않아도됨.
+DOM/ref와 내부 store가 입력값을 들고, 필요한 곳만 subscribe해서 React 렌더를 일으키는 **uncontrolled-first** 방식
+> useState vs react-hook-form 
+> - useState의 경우 state가 입력값의 SOT인 **controlled** 방식
+> - useState는 로그인, 검색창 처럼 필드가 적은 경우에만 사용
+> - react-hook-form 이점을 많이 살리려면 Input같은 비제어 컴포넌트는 uncontrolled 방식으로 사용
 
-## 사용방법
+## 사용 방법
 
-- features/ui에 정의
+- Input같은 비제어 컴포넌트는 uncontrolled 방식으로 사용하는 것이 효율적
 - 폼이 길어도 하나에 정의하는 것이 효율적
   - **watch() 최적화**: 한 번만 호출하여 전체 폼 값 추적(분리된 각 섹션마다 호출시 비효율적)
   - **리렌더링 최소화**: 불필요한 컴포넌트 분리로 인한 추가 리렌더링 방지
