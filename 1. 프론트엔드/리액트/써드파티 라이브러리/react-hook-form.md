@@ -1,10 +1,15 @@
 # React Hook Form(RHF)
+DOM/ref와 내부 store가 입력값을 들고, 필요한 곳만 subscribe해서 React 렌더를 일으키는 **uncontrolled-first** 방식
 > React Hook Form 공식 문서 : [React Hook Form](https://react-hook-form.com/)
 
-DOM/ref와 내부 store가 입력값을 들고, 필요한 곳만 subscribe해서 React 렌더를 일으키는 **uncontrolled-first** 방식
-> useState vs react-hook-form 
+> 💡 useState vs react-hook-form 
 > - useState의 경우 state가 입력값의 SOT인 **controlled** 방식
 > - useState는 로그인, 검색창 처럼 필드가 적은 경우에만 사용
+>   - 단, 옵션이 많은 검색창/필터라면 RHF 써도 됨
+>   - HTML 관점에서도 `<search>` 는 검색/필터링 기능을 수행하는 `<form>` 컨트롤 영역을 나타내는 용도
+>   - [search MDN 참고](https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/search)
+>   - 단, RHF를 “필터 UI의 임시 입력 상태 관리”로 쓰고, 최종 필터 상태는 URL search params나 query key와 동기화하는 구조로 사용해야함
+>   - [Query Params syncronization 참고](https://github.com/orgs/react-hook-form/discussions/8126)
 > - react-hook-form 이점을 많이 살리려면 Input같은 비제어 컴포넌트는 uncontrolled 방식으로 사용
 
 ## 사용 방법
