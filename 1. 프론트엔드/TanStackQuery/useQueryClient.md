@@ -29,7 +29,3 @@ function UserProfile({ userId }) {
   return <div>{user?.name}</div>
 }
 ```
-
-## useQuery
-enabled
-- 실행조건
