@@ -122,18 +122,6 @@ App에서 `useQuery`를 직접 많이 쓰기보다, **쿼리 정의( queryOption
     |- features       // 사용자 가치가 있는 행위 단위(권한 수정, 필터링, 댓글 작성 등)
     |- entities       // 비즈니스 핵심 개체(Company, Complex, User 등)의 상태/뷰
         |- company
-              |- api
-                  |- companyApi.ts
-              |- model
-                  |- consts.ts     // 도메인 고정값(회사 유형, 상태 코드 등).
-                  |- mutations.ts  // react-query useMutation 훅들(생성/수정/삭제 등)
-                  |- queries.ts    // react-query useQuery/useInfiniteQuery 훅들
-                  |- queryKeys.ts  // 쿼리 키 중앙 관리 (예: ['company','list',{q}])
-                  |- types.ts      // API DTO, Domain Type, ViewModel 타입 정의(명확히 구분 주석)
-              |- ui
-                  |- CompanySearch
-                        |- CompanySearchBox.ts
-                        |- useCompanySearch.ts
         |- complex
               |- api
               |- model
