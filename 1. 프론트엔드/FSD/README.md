@@ -131,47 +131,6 @@ App에서 `useQuery`를 직접 많이 쓰기보다, **쿼리 정의( queryOption
 |- README.md
 ```
 
-## 실전 적용 참고 (카카오페이 사례)
-> 출처: [FSD 아키텍처 적용기 \| 카카오페이 기술 블로그](https://tech.kakaopay.com/post/fsd/)
-
-### FSD 도입을 고려해볼 시점 (공식 문서 인용)
-- 새로운 팀원이 구조를 이해하기 어려울 때
-- 프로젝트가 커지면서 구조가 얽히고, 기능 개발 속도가 느려졌을 때  
-→ **현재 구조에 문제가 없다면 반드시 바꿀 필요는 없다.**
-
-### 레이어 선택
-- **widgets**는 필수가 아니다. 재사용되는 독립 대형 UI가 적으면 사용하지 않고, features 내에서만 재사용 UI를 관리해도 된다.
-
-### Slice Grouping (Pages)
-- 동일 도메인 페이지가 많으면(목록/상세/등록/수정 등) **한 슬라이스 그룹**으로 묶을 수 있다.  
-  예: `pages/benefit/benefitList`, `pages/benefit/benefitDetail` … → `pages/benefit/` 아래에 slice들 배치.
-- FSD 가이드: 동일 도메인 데이터를 다루는 페이지는 하나의 slice에 속해 있을 수 있다.
-
-### API 배치 기준 (재사용 범위로 구분)
-| 재사용 범위 | 배치 위치 | 예시 |
-|-------------|-----------|------|
-| 해당 페이지 슬라이스에서만 사용 | `pages/[slice]/api` | 혜택 목록 조회 (목록 페이지 전용) |
-| 같은 페이지 그룹 내 여러 슬라이스에서 사용 | `features/[slice]/api` | 혜택 상세 조회 (상세·수정 페이지에서 사용) |
-| 여러 페이지/도메인에서 사용 | `entities/[domain]/api` | 매장(partner) 상세 조회 등 공통 도메인 API |
-
-→ 모든 API를 entities에 몰면 entity가 비대해지고 “도메인 엔티티” 역할이 흐려지므로, **재사용 범위**로 나누는 것이 좋다.
-
-### 마이그레이션: 상향식(Bottom-Up)
-기존 코드를 한 번에 옮기지 말고, 아래 순서로 점진 이동하면 “이 코드가 어느 레이어까지 재사용되는가?”를 팀이 자연스럽게 익힐 수 있다.
-
-1. 전역 사용 코드 → `shared`
-2. 여러 features에서 사용 → `entities/[domain]`
-3. 여러 pages 슬라이스에서 사용 → `features/[slice]`
-4. 나머지 페이지 전용 → `pages` 하위에 배치
-
-### 적용 효과 (정리)
-- **shared** → 전역에서 사용
-- **entities** → 여러 pages/기능에서 사용
-- **features** → 특정 페이지 그룹에서만 사용
-- **pages** → 특정 페이지/슬라이스에서만 사용  
-
-→ “이 코드는 어디에 넣어야 할까?”에 대한 판단 기준이 명확해진다.
-
 ## 문서 출처·작성 주체·표준 여부
 [feature-sliced.design](https://feature-sliced.design/) / [fsd.how](https://fsd.how/) 는 FSD의 **공식 문서 사이트**로 보는 것이 맞다. 다만 “누가 만들었는지”, “표준인지”는 층위를 나눠서 보는 것이 정확하다.
 
@@ -206,4 +165,3 @@ App에서 `useQuery`를 직접 많이 쓰기보다, **쿼리 정의( queryOption
 - [feature-sliced/documentation](https://github.com/feature-sliced/documentation): 문서 저장소
 - [Types \| FSD](https://feature-sliced.design/docs/guides/examples/types): 타입 배치, DTO/매퍼, props·context
 - [마이그레이션 가이드 \| FSD](https://feature-sliced.design/docs/guides/migration/from-custom)
-- [FSD 아키텍처 적용기 \| 카카오페이 기술 블로그](https://tech.kakaopay.com/post/fsd/): 실전 도입·API 배치·Slice Grouping·상향식 마이그레이션
