@@ -18,7 +18,7 @@ shared
   |- lib
   |- config
   |- routes
-  |- i18n
+  |- i18n/ko.ts
 ```
 > ❗️ Segement는 본질(무엇인지)이 아닌 목적(왜)을 설명해야함.
 > - components, hooks, modals, assets (x)
