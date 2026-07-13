@@ -53,9 +53,17 @@ export default function App() {
   )
 }
 ```
+> 💡 zod를 안쓰는 경우 아래 기능들 추가 검토
+> - required, min, max, minLength, maxLength, pattern, validate 등 체크 가능
+> - 타입스크립트 사용시 인터페이스(ex. IFormInput) 정의해놓으면 타입체크도 가능
 
-- required, min, max, minLength, maxLength, pattern, validate 등 체크 가능
-- 타입스크립트 사용시 인터페이스(ex. IFormInput) 정의해놓으면 타입체크도 가능
+> 💡 register 사용시 숫자를 사용하고 싶은 경우 주의사항
+> ```tsx
+> {...register('totalScore', {
+>    setValueAs: (value) => Number(value || 0),
+> })}
+> ```
+> HTML input은 RHF register로 받으면 기본 값이 문자열이기 때문에 서버에 숫자로 보내야하는 경우 변환 필요. (가급적이면 서버에 보낼때도 문자로)
 
 ### 1.2. 커스텀 컴포넌트 통합
 
