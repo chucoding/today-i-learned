@@ -31,7 +31,7 @@ DOM/ref와 내부 store가 입력값을 들고, 필요한 곳만 subscribe해서
 import { useForm, SubmitHandler } from "react-hook-form"
 
 /* 폼 인터페이스 정의 */
-interface IFormInput {
+interface FormInput {
   firstName: string
   lastName: string
   age: number
@@ -40,8 +40,8 @@ interface IFormInput {
 export default function App() {
 
   /* useForm, SubmitHandler에 인터페이스 추가 */
-  const { register, handleSubmit } = useForm<IFormInput>()
-  const onSubmit: SubmitHandler<IFormInput> = (data) => console.log(data)
+  const { register, handleSubmit } = useForm<FormInput>()
+  const onSubmit: SubmitHandler<FormInput> = (data) => console.log(data)
 
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
@@ -55,7 +55,7 @@ export default function App() {
 ```
 > 💡 zod를 안쓰는 경우 아래 기능들 추가 검토
 > - required, min, max, minLength, maxLength, pattern, validate 등 체크 가능
-> - 타입스크립트 사용시 인터페이스(ex. IFormInput) 정의해놓으면 타입체크도 가능
+> - 타입스크립트 사용시 인터페이스(ex. FormInput) 정의해놓으면 타입체크도 가능
 
 > 💡 register 사용시 숫자를 사용하고 싶은 경우 주의사항
 > ```tsx
@@ -72,7 +72,7 @@ import Select from "react-select"
 import { useForm, Controller, SubmitHandler } from "react-hook-form"
 import { Input } from "@material-ui/core"
 
-interface IFormInput {
+interface FormInput {
   firstName: string
   lastName: string
   iceCreamType: { label: string; value: string }
@@ -87,7 +87,7 @@ const App = () => {
     },
   })
 
-  const onSubmit: SubmitHandler<IFormInput> = (data) => {
+  const onSubmit: SubmitHandler<FormInput> = (data) => {
     console.log(data)
   }
 
