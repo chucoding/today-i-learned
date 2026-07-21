@@ -11,6 +11,13 @@ interface User {
 let userArr: User[] = [{ name: 'Neo', age: 85 }];
 ```
 
+## 명명 규칙
+타입 시스템이 이미 정보를 표현하므로 이름에 타입 정보를 장식하지 않는게 좋음.
+```
+ex) IForm (x)
+```
+[타입스크립트 공식가이드 문서 참조](https://github.com/microsoft/TypeScript/wiki/Coding-guidelines)
+
 ## interface vs type
 > 기본은 type을 사용하고, 객체 상속(extends)이 필요할 때만 interface를 사용
 > - 공식 스타일 가이드에서는 **일관성**을 위해 객체는 `interface`, 유니언/매핑 등이 필요할 때만 `type`을 쓰는 방식을 권장한다.
