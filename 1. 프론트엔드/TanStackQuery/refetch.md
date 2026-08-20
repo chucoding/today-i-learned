@@ -27,7 +27,16 @@
 
 > refetch function should only be used when the same query is called with exactly the same parameters. If you are using new parameters (new filters, pages etc.), you should use a new query key.
 
-즉 조회 버튼은 **조건이 같을 때만** `refetch`를 부르면 된다.
+즉 조회 버튼은 **조건이 같을 때만** `refetch`를 부르면 된다. 메인테이너가 제시한 형태도 이 분기 그대로다.
+
+```js
+// https://github.com/TanStack/query/discussions/3396
+if (isEqual(params, searchParams)) {
+  query.refetch()
+} else {
+  setSearchParams(params)
+}
+```
 
 ```tsx
 const { data, refetch } = useQuery({
@@ -94,7 +103,13 @@ const SearchBox = () => {
 
 ### 쓰지 말아야 할 방법
 
-쿼리 키에 `_timestamp: Date.now()`를 섞어 강제로 키를 바꾸는 방식. 실무 코드에서 자주 보이지만 클릭마다 캐시 엔트리가 쌓이고 키가 오염된다.
+**쿼리 키에 `_timestamp: Date.now()`를 섞어 강제로 키를 바꾸는 방식.** 실무 코드에서 자주 보이지만 클릭마다 캐시 엔트리가 쌓이고 키가 오염된다.
+
+**`enabled: false`로 두고 버튼에서 `refetch`만 부르는 방식.** 가장 흔히 보이지만 공식 문서가 권장하지 않는다.
+
+> Permanently disabling a query opts out of many great features that TanStack Query has to offer (like background refetches), and it takes you from the declarative approach (defining dependencies when your query should run) into an imperative mode (fetch whenever I click here).
+
+`refetch`에는 파라미터를 넘길 수 없다는 제약도 있다. 조건은 키로 두고, `refetch`는 같은 조건 재조회에만 쓰는 게 맞다.
 
 ## staleTime 은 어떻게 두나
 
@@ -119,6 +134,9 @@ const SearchBox = () => {
 
 ## 참고
 
+- [Best practice to execute the query when query key has not changed · Discussion #3396](https://github.com/TanStack/query/discussions/3396) — 분기 형태의 근거
+- [How can i make the search button work with react query? · Discussion #4555](https://github.com/TanStack/query/discussions/4555)
+- [Disabling/Pausing Queries | TanStack Query](https://tanstack.com/query/latest/docs/framework/react/guides/disabling-queries)
 - [React Query FAQs — TkDodo](https://tkdodo.eu/blog/react-query-fa-qs)
 - [Practical React Query — TkDodo](https://tkdodo.eu/blog/practical-react-query)
 - [React Query as a State Manager — TkDodo](https://tkdodo.eu/blog/react-query-as-a-state-manager)
