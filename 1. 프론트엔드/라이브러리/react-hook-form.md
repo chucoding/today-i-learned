@@ -457,5 +457,58 @@ const toRequest = (values: FormValues) => ({
   - **즉시 차단** : `isValid` 게이트를 쓰되 왜 못 누르는지 별도로 안내
 - 초기 1렌더가 `false`라 `isValid` 게이트는 마운트 시 버튼이 잠깐 비활성→활성으로 깜빡인다.
 
+## reset
+폼 값을 되돌리는 메서드. **인자를 넘기느냐에 따라 내부 동작이 갈린다.**
+
+| 호출 | native `form.reset()` | 등록된 필드 참조(`_fields`) |
+|---|---|---|
+| `reset()` | 실행 → 비제어 입력의 DOM 값도 비워짐 | 버림 |
+| `reset(values)` | **실행 안 함** | 버림 |
+| `reset(values, { keepFieldsRef: true })` | 실행 안 함 | **유지** (필드마다 `setValue`) |
+
+### 함정 — reset(값) 뒤에 비제어 입력이 죽는다
+
+증상이 두 개로 나타난다.
+
+1. 초기화해도 입력창에 이전 글자가 그대로 남는다
+2. 초기화 **이후** 입력한 값이 제출 데이터에 실리지 않는다
+
+원인은 `_reset` 내부의 `_fields = {}`다. 등록된 필드 참조를 버리는데, 값을 넘긴 호출은 native `form.reset()` 경로도 타지 않아 DOM 값을 비울 수단이 없다. 참조가 끊긴 뒤 입력하면 RHF의 `onChange`가 `_fields`에서 필드를 못 찾고 그냥 빠져나가므로 `_formValues`가 갱신되지 않는다.
+
+`Controller`(제어) 필드는 값이 폼 상태에서 내려오므로 영향이 없다. **비제어(`register`)만 깨진다.** 그래서 같은 폼 안에서 한 필드만 조용히 죽어 원인을 찾기 어렵다.
+
+해결은 `keepFieldsRef: true`다. `KeepStateOptions`의 공식 필드이고(`types/form.d.ts`), RHF 자신도 `useForm`의 `values` 옵션 동기화 경로에서 이 옵션을 쓴다.
+
+```tsx
+reset(nextDefaultValues, { keepFieldsRef: true })
+```
+
+> 💡 인자 없는 `reset()`으로도 해결되지만 되돌아가는 값이 `_defaultValues`다. "진입 시 조건"과 "빈 조건"이 달라야 하는 화면(딥링크로 조건을 받고 들어오는 필터 등)에서는 초기화가 딥링크 값을 복원해버리므로 쓸 수 없다.
+
+### 성능 — Controller로 바꿔도 되지만 입력마다 리렌더한다
+
+같은 버그를 "그 필드도 `Controller`로 바꾼다"로 고칠 수도 있다. 어느 쪽이 싼지 DS Input을 감싸 렌더 횟수를 셌다.
+
+실측 (rhf 7.72.0 / react 19.2.4, 6글자 입력 후 초기화 클릭)
+
+| | 마운트 | 6글자 입력 중 | 초기화 클릭 |
+|---|---|---|---|
+| `register` + `keepFieldsRef` | parent 2 / input 2 | **+0 / +0** | +1 / +1 |
+| `Controller` | parent 2 / input 2 | +0 / **+6** | +1 / +1 |
+
+- **입력 중에만 갈린다.** `Controller`는 내부 `useWatch`가 값 변경을 구독하므로 키 입력 1회당 그 필드 서브트리 1회 리렌더. `register`는 값이 DOM으로 직접 들어가고 `_formValues`만 갱신되므로 0회.
+- **부모 폼은 두 방식 모두 리렌더되지 않는다**(+0). `Controller`의 비용은 그 필드 서브트리에 갇힌다 — "제어로 바꾸면 폼 전체가 다시 그려진다"가 아니다.
+- **초기화는 동률**(+1/+1). `keepFieldsRef`가 `_fields = {}` 대신 필드별 `setValue`를 돌지만 클릭 1회의 동기 루프이고 리렌더 횟수는 늘지 않는다.
+- 성능만 보면 `keepFieldsRef`가 우세하다. 핫 패스(입력)에서 0, 콜드 패스(초기화)에서 동률이라 우열이 뒤집히는 지점이 없다.
+
+다만 체감 차이는 작다. 입력 1회당 Input 하나 리렌더는 1ms 미만이라 필드 10개 수준의 검색 박스에서 사용자가 느낄 수준은 아니다. 그래서 판단 기준은 성능보다 이쪽이 크다.
+
+| | 유리한 상황 |
+|---|---|
+| `register` + `keepFieldsRef` | 비제어 모델을 유지하고 싶을 때, 필드가 많거나 입력 컴포넌트가 무거울 때 |
+| `Controller` | 그 필드에 검증·에러 표시를 붙일 때, 비제어 DOM 값이 폼 상태와 어긋나는 문제 계열 자체를 피하고 싶을 때 |
+
+"비제어니까 무조건 빠르다"보다 **비용이 어느 경로에 붙는지**(입력 vs 클릭)로 보는 편이 정확하다.
+
 ## 참고자료
 [왜 shouldUnregister: true인데 검증 에러가 발생할까?](https://toby2009.tistory.com/83#shouldUnregister%EB%8A%94%20%EB%AC%B4%EC%97%87%EC%9D%B8%EA%B0%80%3F-1-1)
