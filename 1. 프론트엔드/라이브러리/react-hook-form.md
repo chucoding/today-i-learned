@@ -458,57 +458,228 @@ const toRequest = (values: FormValues) => ({
 - 초기 1렌더가 `false`라 `isValid` 게이트는 마운트 시 버튼이 잠깐 비활성→활성으로 깜빡인다.
 
 ## reset
-폼 값을 되돌리는 메서드. **인자를 넘기느냐에 따라 내부 동작이 갈린다.**
 
-| 호출 | native `form.reset()` | 등록된 필드 참조(`_fields`) |
+폼 값을 되돌리는 메서드. 여기서는 **인자를 넘긴 `reset(값)`이 비제어(`register`) 입력의 화면을 되돌리지 못하는** 버그를 다룬다.
+
+### 어떤 버그인가
+
+아래 20줄로 재현된다. (rhf 7.72.0 / react 19.2.4 / `babel-plugin-react-compiler` 켬)
+
+```tsx
+function App() {
+  const { register, reset, handleSubmit } = useForm({ defaultValues: { keyword: '' } })
+
+  return (
+    <form onSubmit={handleSubmit(console.log)}>
+      <input {...register('keyword')} />
+      <button type="button" onClick={() => reset({ keyword: '' })}>초기화</button>
+      <button type="submit">제출</button>
+    </form>
+  )
+}
+```
+
+| 순서 | 동작 | 기대 | 실제 |
+|---|---|---|---|
+| 1 | `abc` 입력 → 초기화 클릭 | 입력창이 빈다 | **`abc`가 그대로 남는다** |
+| 2 | `xyz` 입력 → 초기화 클릭 | 입력창이 빈다 | **`xyz`가 그대로 남는다** |
+| 3 | `q` 입력 → 제출 | `{ keyword: 'q' }` | **`{ keyword: '' }`** |
+
+증상은 두 개다.
+
+1. **초기화를 눌러도 입력창 글자가 안 지워진다**
+2. 그 뒤로 **그 입력창에 뭘 쳐도 제출 데이터에 안 실린다**
+
+폼 상태(`_formValues`)만 비워지고 화면과 어긋난 것이다. 에러도 경고도 안 뜨고, 같은 폼의 `Controller` 필드는 멀쩡해서 **한 필드만 조용히 죽는다.**
+
+### 세 조건이 겹쳐야 터진다
+
+| 조건 | 아니면 |
+|---|---|
+| RHF **7.60.0 이상** | 7.59 이하는 정상 |
+| 인자를 넘긴 **`reset(값)`** | 인자 없는 `reset()`은 정상 |
+| 비제어(`register`) + reset 뒤에 **그 `register(...)` 호출이 다시 평가되지 않음** | `Controller`거나, 다시 평가되면 정상 |
+
+세 번째 조건 때문에 **같은 코드가 프로젝트마다 다르게 동작한다.** 위 재현 코드로 실측한 표다.
+
+| | 1번째 초기화 | 2번째 초기화 | 초기화 후 입력→제출 |
+|---|---|---|---|
+| `register` | X | X | X |
+| `register` (React Compiler 끔) | O | O | O |
+| `register` + `keepFieldsRef: true` | O | **X** | O |
+| `Controller` | O | O | O |
+
+React Compiler를 끄면 버그가 사라진다. 하지만 컴파일러를 안 쓰더라도 **입력창이 `memo` 자식 안에 있으면 똑같이 터진다.** 진짜 조건은 "React Compiler"가 아니라 **"reset 뒤에 그 필드가 다시 `register`되지 않는다"** 쪽이다.
+
+> ⚠️ 이건 **7.60.0(2025-07)에서 바뀐 동작**이다. 7.59까지는 `_fields`를 버리는 코드가 아예 없었다.
+> 필드배열 리셋 버그([#12922](https://github.com/react-hook-form/react-hook-form/issues/12922))를 고치려고
+> [PR #12923](https://github.com/react-hook-form/react-hook-form/pull/12923)이 기본 동작을 "버린다"로 바꿨다.
+> `package.json`에 `^7.55.0`처럼 캐럿으로 적어뒀으면 **아무것도 안 했는데 버그가 생긴다.**
+
+### 준비 — 값이 어디 있는가
+
+원인을 이해하려면 먼저 입력창의 값이 **어디에 저장되는지**를 알아야 한다. RHF에서 입력창을 연결하는 방법은 두 가지고, 값이 사는 곳이 다르다.
+
+```mermaid
+flowchart LR
+  subgraph A["비제어 · register"]
+    A1["폼 상태<br/>_formValues"]
+    A2["입력창 DOM<br/>input.value"]
+    A2 -- "타이핑하면 값을 보고함" --> A1
+    A1 -. "화면을 직접 못 바꿈<br/>(ref로 찔러야 함)" .-> A2
+  end
+  subgraph B["제어 · Controller"]
+    B1["폼 상태<br/>_formValues"]
+    B2["입력창 DOM<br/>value={field.value}"]
+    B1 == "값이 항상 내려옴" ==> B2
+    B2 -- "타이핑" --> B1
+  end
+```
+
+- **비제어(`register`)** : 화면이 정본이다. 폼 상태는 사본이라 화면을 바꾸려면 RHF가 저장해 둔 **ref**(입력창 리모컨)로 DOM을 직접 찔러야 한다.
+- **제어(`Controller`)** : 폼 상태가 정본이다. 폼 상태만 바꾸면 화면은 저절로 따라온다.
+
+버그는 **비제어에서만** 난다. 리모컨을 잃으면 화면을 못 고치기 때문이다.
+
+### 무슨 일이 일어났나
+
+`reset`이 내부에서 관리하는 게 **두 개**인데, 이름이 비슷해서 헷갈린다.
+
+| 이름 | 정체 | 비유 |
 |---|---|---|
-| `reset()` | 실행 → 비제어 입력의 DOM 값도 비워짐 | 버림 |
-| `reset(values)` | **실행 안 함** | 버림 |
-| `reset(values, { keepFieldsRef: true })` | 실행 안 함 | **유지** (필드마다 `setValue`) |
+| `_fields` | 필드별 ref 보관함 | 입력창 **리모컨 보관함** |
+| `_names.mount` | 지금 등록된 필드 이름 목록 | 리모컨을 **누를 대상 명단** |
 
-### 함정 — reset(값) 뒤에 비제어 입력이 죽는다
+`reset(값)`을 부르면 이렇게 동작한다.
 
-증상이 두 개로 나타난다.
+1. 리모컨 보관함(`_fields`)을 **버린다** → 화면을 고칠 수단이 사라진다
+2. 명단(`_names.mount`)도 **비운다**
+3. 값을 넘긴 호출이라 브라우저 기본 `form.reset()`도 안 탄다 → 화면을 비울 다른 길도 없다
 
-1. 초기화해도 입력창에 이전 글자가 그대로 남는다
-2. 초기화 **이후** 입력한 값이 제출 데이터에 실리지 않는다
+그래서 폼 상태만 초기화되고 **화면에는 이전 글자가 남는다.** 심지어 리모컨이 없으니 그 뒤에 입력한 값도 폼 상태에 안 들어간다. 앞의 증상 1, 2가 각각 이것이다.
 
-원인은 `_reset` 내부의 `_fields = {}`다. 등록된 필드 참조를 버리는데, 값을 넘긴 호출은 native `form.reset()` 경로도 타지 않아 DOM 값을 비울 수단이 없다. 참조가 끊긴 뒤 입력하면 RHF의 `onChange`가 `_fields`에서 필드를 못 찾고 그냥 빠져나가므로 `_formValues`가 갱신되지 않는다.
+### keepFieldsRef — 절반만 해결한다
 
-`Controller`(제어) 필드는 값이 폼 상태에서 내려오므로 영향이 없다. **비제어(`register`)만 깨진다.** 그래서 같은 폼 안에서 한 필드만 조용히 죽어 원인을 찾기 어렵다.
-
-해결은 `keepFieldsRef: true`다. `KeepStateOptions`의 공식 필드이고(`types/form.d.ts`), RHF 자신도 `useForm`의 `values` 옵션 동기화 경로에서 이 옵션을 쓴다.
+7.60.0이 같이 넣어준 탈출구가 `keepFieldsRef: true`다. 공식 문서에도 있다.
 
 ```tsx
 reset(nextDefaultValues, { keepFieldsRef: true })
 ```
 
-> 💡 인자 없는 `reset()`으로도 해결되지만 되돌아가는 값이 `_defaultValues`다. "진입 시 조건"과 "빈 조건"이 달라야 하는 화면(딥링크로 조건을 받고 들어오는 필터 등)에서는 초기화가 딥링크 값을 복원해버리므로 쓸 수 없다.
+이걸 켜면 **1번(리모컨 보관함)은 지켜진다.** 그래서 두 증상 중 하나는 확실히 사라진다.
 
-### 성능 — Controller로 바꿔도 되지만 입력마다 리렌더한다
+| 증상 | `keepFieldsRef`로 해결? |
+|---|---|
+| 초기화 이후 입력한 값이 제출 데이터에 안 실림 | ✅ 해결 (리모컨이 살아있음) |
+| 초기화해도 화면에 이전 글자가 남음 | ⚠️ **첫 번째 reset만** |
 
-같은 버그를 "그 필드도 `Controller`로 바꾼다"로 고칠 수도 있다. 어느 쪽이 싼지 DS Input을 감싸 렌더 횟수를 셌다.
+문제는 **2번(명단)은 여전히 비워진다**는 것. 그리고 `keepFieldsRef`가 화면을 되돌릴 때 이렇게 돈다.
 
-실측 (rhf 7.72.0 / react 19.2.4, 6글자 입력 후 초기화 클릭)
+```js
+// createFormControl.ts — reset 내부
+if (keepStateOptions.keepFieldsRef) {
+  for (const fieldName of _names.mount) {   // ← 명단을 보고 돈다
+    setValue(fieldName, get(values, fieldName))
+  }
+} else {
+  _fields = {}                              // ← 옵션 없으면 리모컨을 버린다
+}
+// ...그리고 함수 끝에서
+_names = { mount: new Set(), ... }          // ← 명단을 비운다
+```
 
-| | 마운트 | 6글자 입력 중 | 초기화 클릭 |
+**리모컨은 있는데 명단이 비어서 아무것도 안 누른다.** 그래서 reset을 두 번째로 부를 때부터 화면이 안 지워진다. 위 실측 표에서 `keepFieldsRef` 행만 "1번째 O / 2번째 X"로 갈린 게 이 이유다.
+
+### 명단은 왜 안 채워지나
+
+명단은 `register(name)`이 호출될 때 채워진다. reset은 어차피 리렌더를 일으키므로, 그때 `{...register('keyword')}`가 다시 평가되기만 하면 명단도 리모컨도 저절로 복구된다. **실측 표에서 React Compiler를 껐을 때 멀쩡했던 게 이 경로다.**
+
+문제는 이 복구가 **그 JSX가 다시 평가되는지**에 달려 있다는 것. reset 직후 내부 상태를 찍어봤다.
+
+```
+React Compiler 켬  reset 후  _names.mount=[]           _fields=[]            입력창='abc'
+React Compiler 끔  reset 후  _names.mount=['keyword']  _fields=['keyword']   입력창=''
+```
+
+컴파일러가 `<input {...register('keyword')} />`를 메모이즈하면 리렌더가 나도 그 JSX는 재평가되지 않는다. `register('keyword')`가 아예 호출되지 않으니 명단도 리모컨도 빈 채로 남는다. `memo`로 감싼 자식 안에 입력창이 있는 경우도 똑같다.
+
+`Controller`가 멀쩡한 건 반대 이유다. `useController`는 내부 `useWatch`로 값 변경을 구독하니 reset마다 리렌더되고, `control.register(name, ...)`을 **렌더 본문에서 매번 호출**한다. 훅 호출이라 컴파일러도 건너뛰지 못한다. 그래서 스스로 명단에 복귀한다.
+
+> 정리하면 `register` 스프레드가 살아 돌아오는 건 **우연히 리렌더 + 재평가가 겹쳐서**다.
+> 메모이제이션이 끼는 순간 사라지는 보장이라, 여기 기대고 설계하면 안 된다.
+
+### 그래서 결론 — 그 필드를 Controller로 바꾼다
+
+값이 폼 상태에서 내려오므로 리모컨도 명단도 필요 없다. 문제 계열 자체가 사라진다.
+
+```tsx
+// 이랬던 걸
+<Input label="검색어" {...register('keyword')} />
+
+// 이렇게
+<Controller
+  render={({ field }) => <Input {...field} label="검색어" />}
+  control={control}
+  name="keyword"
+/>
+```
+
+실제 화면에서 후보를 다 돌려본 결과다. 시나리오는 **URL 쿼리스트링으로 검색 조건을 받는 목록 화면**이고, "재진입"은 같은 쿼리스트링으로 다시 들어와 `reset(쿼리값)`이 한 번 더 도는 상황이다.
+
+| 해법 | 재진입 반영 | 재진입 후 초기화 | 초기화 2회 | 초기화 후 입력→조회 |
+|---|---|---|---|---|
+| `reset(values)` | X | X | X | X |
+| `keepFieldsRef` 단독 | X | X | X | X |
+| `keepFieldsRef` + 강제 리렌더 | X | X | X | X |
+| `useForm({ values })` | X | X | X | X |
+| `resetField` + DOM 직접 조작 | O | O | O | **X** |
+| `keepFieldsRef` + `register()` 재등록 | O | O | O | O |
+| `keepFieldsRef` + `setValue()` | O | O | O | O |
+| **`Controller`** | **O** | **O** | **O** | **O** |
+
+통과하는 건 세 개인데, 아래 둘은 **"reset을 부르는 모든 자리에서 그 필드를 손으로 되살린다"** 는 약속을 계속 지켜야 한다. 나중에 `register` 필드를 하나 더 추가하면 조용히 재발한다. `Controller`는 지킬 약속이 없다.
+
+### 성능 — 걱정할 수준이 아니다
+
+`Controller`는 키 입력 1회당 그 필드를 1번 다시 그린다. 실측(rhf 7.72.0 / react 19.2.4).
+
+| | 마운트 | 6글자 입력 | 초기화 클릭 |
 |---|---|---|---|
-| `register` + `keepFieldsRef` | parent 2 / input 2 | **+0 / +0** | +1 / +1 |
+| `register` 계열 | parent 2 / input 2 | **+0 / +0** | +1 / +1 |
 | `Controller` | parent 2 / input 2 | +0 / **+6** | +1 / +1 |
 
-- **입력 중에만 갈린다.** `Controller`는 내부 `useWatch`가 값 변경을 구독하므로 키 입력 1회당 그 필드 서브트리 1회 리렌더. `register`는 값이 DOM으로 직접 들어가고 `_formValues`만 갱신되므로 0회.
-- **부모 폼은 두 방식 모두 리렌더되지 않는다**(+0). `Controller`의 비용은 그 필드 서브트리에 갇힌다 — "제어로 바꾸면 폼 전체가 다시 그려진다"가 아니다.
-- **초기화는 동률**(+1/+1). `keepFieldsRef`가 `_fields = {}` 대신 필드별 `setValue`를 돌지만 클릭 1회의 동기 루프이고 리렌더 횟수는 늘지 않는다.
-- 성능만 보면 `keepFieldsRef`가 우세하다. 핫 패스(입력)에서 0, 콜드 패스(초기화)에서 동률이라 우열이 뒤집히는 지점이 없다.
+300타 입력 시간(3회 반복)은 `register` 계열 타당 **0.05ms**, `Controller` 타당 **0.16~0.19ms**.
+3~4배지만 절대값이 **타당 +0.1ms**다. 프레임 예산 16ms에 비하면 감지 불가다.
 
-다만 체감 차이는 작다. 입력 1회당 Input 하나 리렌더는 1ms 미만이라 필드 10개 수준의 검색 박스에서 사용자가 느낄 수준은 아니다. 그래서 판단 기준은 성능보다 이쪽이 크다.
+중요한 건 두 가지다.
 
-| | 유리한 상황 |
-|---|---|
-| `register` + `keepFieldsRef` | 비제어 모델을 유지하고 싶을 때, 필드가 많거나 입력 컴포넌트가 무거울 때 |
-| `Controller` | 그 필드에 검증·에러 표시를 붙일 때, 비제어 DOM 값이 폼 상태와 어긋나는 문제 계열 자체를 피하고 싶을 때 |
+- **부모 폼은 두 방식 모두 리렌더되지 않는다**(+0). `Controller` 비용은 그 필드 서브트리에 갇힌다.
+  "제어로 바꾸면 폼 전체가 다시 그려진다"는 오해다.
+- 그래서 **판단 기준은 성능이 아니라 정합성**이다. 리스트가 수백 행이거나 입력 컴포넌트가 무거운 경우에만 성능을 따진다.
 
-"비제어니까 무조건 빠르다"보다 **비용이 어느 경로에 붙는지**(입력 vs 클릭)로 보는 편이 정확하다.
+### 곁가지 — useForm({ values })의 deepEqual
+
+외부 값을 폼에 넣는 공식 경로는 `useForm({ values })`다. 내부적으로 `reset(values, { keepFieldsRef: true })`를 부르므로 위 문제를 그대로 물려받는다. 게다가 함정이 하나 더 있다.
+
+```js
+if (props.values && !deepEqual(props.values, _values.current)) {
+  control._reset(props.values, { keepFieldsRef: true, ... })
+} else {
+  control._resetDefaultValues()   // ← reset을 아예 안 한다
+}
+```
+
+동기화 여부를 **참조가 아니라 내용(`deepEqual`)** 으로 정한다. 새 객체를 넘겨도 내용이 직전과 같으면 되돌리지 않는다.
+
+> URL 쿼리스트링으로 조건을 받는 화면에서 문제가 된다. 같은 링크로 다시 들어오면 내용이 같아서 스킵되고,
+> 그 사이 사용자가 바꿔둔 조건이 화면에 남는다. 그래서 참조 비교(`값 === 직전값`)를 손으로 하는 편이 낫다.
+
+단 `deepEqual`은 `Date`를 `getTime()`으로 비교하므로, 값에 `new Date()`가 하나라도 섞여 있으면 밀리초가 달라 대개 스킵되지 않는다. **밀리초가 겹치는지에 결과가 달라지는 구조 자체가 위험**하다고 보는 게 맞다.
+
+### 한 줄 정리
+
+`reset(값)`은 비제어 입력의 화면을 되돌릴 수단(`_fields`, `_names.mount`)을 버린다. 리렌더로 복구되는 건 우연이고 메모이제이션이 끼면 깨진다. `keepFieldsRef`는 절반만 막아준다.
+**입력창 값이 폼 상태와 어긋나면 안 되는 필드는 처음부터 `Controller`로 두는 게 싸다.**
 
 ## 참고자료
 [왜 shouldUnregister: true인데 검증 에러가 발생할까?](https://toby2009.tistory.com/83#shouldUnregister%EB%8A%94%20%EB%AC%B4%EC%97%87%EC%9D%B8%EA%B0%80%3F-1-1)
