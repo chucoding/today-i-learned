@@ -381,5 +381,81 @@ type이 basic일때는 extra 필드가 아예 스키마에 존재하지 않음.
 - 정말 복잡한 다중 필드 의존성이 있는 경우
 - 식별자 필드를 만들기 어려운 특수한 상황
 
+## disabled
+필드를 비활성화하면서 **폼 상태에서도 빼는** 옵션. `Controller`의 `disabled` prop, `register('name', { disabled: true })`, `useForm({ disabled: true })`(폼 전체)
+
+> ⚠️ **resolver(zod)를 쓰면 검증을 건너뛰지 않는다.** disabled는 제출 데이터에서 필드를 빼주지만, 검증은 스키마 전체를 기준으로 그대로 돌아간다. `shouldUnregister`와 완전히 같은 원인 — RHF는 필드 상태를, zod는 스키마 전체를 기준으로 동작한다.
+
+실측 (rhf 7.72.0 / @hookform/resolvers 5.2.2 / zod 4.3.6)
+
+| 상태 | zod 검증 | onValid에 들어오는 값 |
+|---|---|---|
+| 일반 | 오류 발생 | `{ detail: '', name: '이름' }` |
+| `disabled` | **오류 그대로 발생** | `{ name: '이름' }` — 필드가 사라짐 |
+
+### 여기서 나오는 함정 2개
+
+**1. 조건부 필수를 disabled로 우회할 수 없다**
+
+"이 필드가 비활성일 때는 필수 아님"을 disabled로 표현하면, 비활성 상태에서도 검증에 걸려 **저장이 아예 불가능**해진다. 조건은 스키마 안에서 쓴다.
+
+```ts
+/* 선택 가능한 하위 항목이 있는 구분만 필수 */
+const schema = z
+  .object({
+    category: z.enum(['A', 'B', 'ETC']),
+    detail: z.union([z.literal(''), z.enum(['A1', 'A2', 'B1'])]),
+  })
+  .refine(
+    ({ category, detail }) => DETAILS_BY_CATEGORY[category].length === 0 || detail !== '',
+    { message: '세부 항목을 선택해 주세요.', path: ['detail'] }
+  )
+```
+
+> 💡 목록(매핑)이 이미 있으면 `'ETC'` 같은 리터럴을 또 적지 말고 **매핑의 length로 파생**시킨다. 조건이 한 곳에만 존재하게 되고, 하위 항목 없는 구분이 추가돼도 자동으로 따라온다.
+
+`discriminatedUnion`으로도 되지만 값 조합이 많으면 스키마가 폭발하므로, 위처럼 매핑이 있는 경우엔 `refine`/`superRefine`이 짧다. (→ `shouldUnregister` 절의 해결 방법 참고)
+
+**2. 제출 데이터에서 필드가 사라진다**
+
+폼 값을 읽어 요청 객체를 만드는 변환 함수가 그 값을 못 받는다. 값은 서버로 보내야 하는데 입력만 막고 싶다면 `disabled` 대신 읽기 전용 처리를 쓰거나, 변환 단계에서 `null`로 바꾼다.
+
+```ts
+const toRequest = (values: FormValues) => ({
+  category: values.category,
+  /* 비활성 조건을 요청 변환에서 다시 명시 */
+  detail: DETAILS_BY_CATEGORY[values.category].length === 0 ? null : values.detail || null,
+})
+```
+
+## mode
+검증을 **언제** 돌릴지 결정하는 `useForm` 옵션. 기본값은 `'onSubmit'`
+
+| mode | 검증 시점 |
+|---|---|
+| `onSubmit` (기본) | 제출할 때 |
+| `onChange` | 값이 바뀔 때마다 |
+| `onBlur` | 포커스가 빠질 때 |
+| `onTouched` | 첫 blur 이후부터 change마다 |
+| `all` | blur + change |
+
+- `reValidateMode`(기본 `'onChange'`)는 **제출 이후**의 재검증 시점이다. `mode: 'onSubmit'`이어도 한 번 제출한 뒤에는 값을 고치는 즉시 오류 문구가 갱신·해제된다.
+- 그래서 "제출했을 때 문구를 보여주고, 고치면 바로 사라진다"는 흐름은 `mode: 'onSubmit'` + `reValidateMode` 기본값 조합이 그대로 만들어 준다. 별도 처리 필요 없음.
+
+### isValid로 제출 버튼을 막을 때
+`formState.isValid`는 **mode와 무관하게** RHF가 resolver를 돌려 동기화한다. 실측하면 초기 1렌더는 `false`였다가 마운트 중 실제 값으로 바뀐다.
+
+```
+[onSubmit] isValid=false  ← 초기 1렌더
+[onSubmit] isValid=true   ← 마운트 중 (아직 아무 조작 없음)
+```
+
+- 즉 `mode: 'onSubmit'`에서도 `isValid` 게이트는 **기술적으로는 동작한다.**
+- 다만 UX가 충돌한다. 버튼을 `!isValid`로 막으면 제출 자체가 불가능하니 **"제출 시 오류 문구"가 뜰 기회가 없다.** 사용자는 왜 못 누르는지 모른 채 멈춘다.
+- 둘 중 하나만 고른다.
+  - **제출 시 문구** : `mode: 'onSubmit'` + 버튼은 진행 상태(제출 중, 업로드 중, 변경 없음)로만 막기
+  - **즉시 차단** : `isValid` 게이트를 쓰되 왜 못 누르는지 별도로 안내
+- 초기 1렌더가 `false`라 `isValid` 게이트는 마운트 시 버튼이 잠깐 비활성→활성으로 깜빡인다.
+
 ## 참고자료
 [왜 shouldUnregister: true인데 검증 에러가 발생할까?](https://toby2009.tistory.com/83#shouldUnregister%EB%8A%94%20%EB%AC%B4%EC%97%87%EC%9D%B8%EA%B0%80%3F-1-1)
