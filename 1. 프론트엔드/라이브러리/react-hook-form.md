@@ -639,6 +639,32 @@ React Compiler 끔  reset 후  _names.mount=['keyword']  _fields=['keyword']   �
 
 통과하는 건 세 개인데, 아래 둘은 **"reset을 부르는 모든 자리에서 그 필드를 손으로 되살린다"** 는 약속을 계속 지켜야 한다. 나중에 `register` 필드를 하나 더 추가하면 조용히 재발한다. `Controller`는 지킬 약속이 없다.
 
+### Controller로 바꿨으면 keepFieldsRef는 지운다
+
+`keepFieldsRef`를 먼저 붙여보고 안 되니까 `Controller`로 갈아타는 순서를 밟으면, 고친 뒤에도 옵션이 남는다. **남길 이유가 없다.** 옵션이 하는 일이 `Controller`에게는 전부 무의미하다.
+
+```js
+if (keepStateOptions.keepFieldsRef) {
+  for (const fieldName of _names.mount) setValue(fieldName, get(values, fieldName))
+} else {
+  _fields = {}
+}
+```
+
+- `_fields = {}`로 리모컨을 버려도 `useController`가 렌더 본문에서 다시 등록한다.
+- 값도 `reset`이 교체한 `_formValues`에서 내려받는다. `setValue`로 밀어넣을 필요가 없다.
+
+실제로 폼의 모든 필드를 `Controller`로 맞춘 뒤 옵션을 떼고 재진입·초기화 시나리오 테스트를 다시 돌렸더니 그대로 통과했다. 원인이 하나(비제어 `register`)인데 옵션까지 남겨두면 **나중에 왜 있는지 알 수 없는 코드**가 된다.
+
+그럼 언제 남기나. 기준은 화면 종류가 아니라 **그 폼에 비제어 필드가 있는지**다.
+
+| 폼 | `register` 입력 | `keepFieldsRef` |
+|---|---|---|
+| 검색·필터 폼 (필드 몇 개, 전부 `Controller`) | 없음 | **지운다** |
+| 상세·등록 폼 (입력 수십 개, `register` 기반) | 있음 | **남긴다** — 없으면 `reset`이 화면을 못 채운다 |
+
+상세 폼처럼 `register`가 실제로 이득인 자리에서는 이 옵션이 `reset`을 동작하게 만드는 유일한 수단이다. 지우면 조회한 값이 입력창에 안 뜬다.
+
 ### 성능 — 걱정할 수준이 아니다
 
 `Controller`는 키 입력 1회당 그 필드를 1번 다시 그린다. 실측(rhf 7.72.0 / react 19.2.4).
@@ -650,6 +676,26 @@ React Compiler 끔  reset 후  _names.mount=['keyword']  _fields=['keyword']   �
 
 300타 입력 시간(3회 반복)은 `register` 계열 타당 **0.05ms**, `Controller` 타당 **0.16~0.19ms**.
 3~4배지만 절대값이 **타당 +0.1ms**다. 프레임 예산 16ms에 비하면 감지 불가다.
+
+#### 왜 register는 +0인가 — "DOM 직접 조작이라 빠르다"가 아니다
+
+`register`가 0렌더인 이유를 직접 조작 덕이라고 읽으면 거꾸로다. **DOM에 쓰는 일은 양쪽 다 한다.**
+
+- `register`(비제어): 타이핑을 **브라우저가 처리한다.** RHF의 `onChange`는 `_formValues`라는 평범한 객체에 값을 넣을 뿐 React state를 건드리지 않는다 → 렌더 0.
+- `Controller`(제어): `field.onChange` → 폼 상태 갱신 → 이름 스코프 구독자 통지 → `useWatch`의 setState → 렌더 → reconcile → **React가 DOM에 값을 다시 쓴다.**
+
+React도 commit 단계에서 결국 `input.value = ...`를 실행한다. 아끼는 건 그 앞단의 **render + reconcile**이지 DOM write가 아니다. `register`가 싼 건 브라우저가 이미 네이티브로 해준 일을 React로 한 번 더 하지 않기 때문이다.
+
+부모 폼이 +0인 이유도 여기서 나온다. `useController`는 이름으로 스코프된 구독이라 자기 서브트리만 다시 그린다.
+
+```js
+// useController 내부
+const value = useWatch({ control, name, defaultValue: defaultValueMemo, exact })
+const formState = useFormState({ control, name, exact })
+```
+
+> `keepFieldsRef`가 `setValue`로 `ref.value`에 직접 써서 렌더를 건너뛰는 것도 마찬가지로 성능 얘기가 아니다.
+> **초기화 클릭 1회당 1번**이다. 그 옵션의 존재 이유는 비제어 필드가 `reset`에서 살아남게 하는 것 — 정합성이다.
 
 중요한 건 두 가지다.
 
@@ -680,6 +726,7 @@ if (props.values && !deepEqual(props.values, _values.current)) {
 
 `reset(값)`은 비제어 입력의 화면을 되돌릴 수단(`_fields`, `_names.mount`)을 버린다. 리렌더로 복구되는 건 우연이고 메모이제이션이 끼면 깨진다. `keepFieldsRef`는 절반만 막아준다.
 **입력창 값이 폼 상태와 어긋나면 안 되는 필드는 처음부터 `Controller`로 두는 게 싸다.**
+그리고 `Controller`로 바꿨으면 `keepFieldsRef`는 같이 지운다 — 남겨두면 원인이 두 개인 것처럼 보인다.
 
 ## 참고자료
 [왜 shouldUnregister: true인데 검증 에러가 발생할까?](https://toby2009.tistory.com/83#shouldUnregister%EB%8A%94%20%EB%AC%B4%EC%97%87%EC%9D%B8%EA%B0%80%3F-1-1)
