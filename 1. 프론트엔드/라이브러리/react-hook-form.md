@@ -1,8 +1,11 @@
 # React Hook Form(RHF)
+
 DOM/ref와 내부 store가 입력값을 들고, 필요한 곳만 subscribe해서 React 렌더를 일으키는 **uncontrolled-first** 방식
+
 > React Hook Form 공식 문서 : [React Hook Form](https://react-hook-form.com/)
 
 > 💡 useState vs react-hook-form 
+>
 > - useState의 경우 state가 입력값의 SOT인 **controlled** 방식
 > - useState는 로그인, 검색창 처럼 필드가 적은 경우에만 사용
 >   - 단, 옵션이 많은 검색창/필터라면 RHF 써도 됨
@@ -53,16 +56,20 @@ export default function App() {
   )
 }
 ```
+
 > 💡 zod를 안쓰는 경우 아래 기능들 추가 검토
+>
 > - required, min, max, minLength, maxLength, pattern, validate 등 체크 가능
 > - 타입스크립트 사용시 인터페이스(ex. FormInput) 정의해놓으면 타입체크도 가능
 
 > 💡 register 사용시 숫자를 사용하고 싶은 경우 주의사항
+>
 > ```tsx
 > {...register('totalScore', {
 >    setValueAs: (value) => Number(value || 0),
 > })}
 > ```
+>
 > HTML input은 RHF register로 받으면 기본 값이 문자열이기 때문에 서버에 숫자로 보내야하는 경우 변환 필요. (가급적이면 서버에 보낼때도 문자로)
 
 ### 1.2. 커스텀 컴포넌트 통합
@@ -231,6 +238,7 @@ function App() {
 form value값들을 읽는 가장 최적화된 함수
 
 <aside>
+
 💡
 
 watch랑 다른 점은 리렌더링을 유발하지 않고 input 변화를 구독하지 않음.
@@ -291,6 +299,7 @@ Controller를 구동하는 커스텀 훅
 - Watch API와 비슷하게 동작하지만, 이를 통해 커스텀 hook 수준에서 다시 렌더링을 분리하고 잠재적으로 애플리케이션의 성능이 향상될 수 있습니다.
 
 <aside>
+
 💡
 
 watch vs useWatch
@@ -300,6 +309,7 @@ watch vs useWatch
 
 필드 하나만 감시하는거면 useWatch가 좋고 여러 필드를 동시 참조해야하면 watch가 좋음.
 (useWatch를 여러 번 사용하는 것보다 watch() 한 번으로 모든 값을 가져오는 것이 효율적)
+
 </aside>
 
 ## 4. useFieldArray
@@ -327,29 +337,34 @@ function FieldArray() {
   );
 }
 ```
+
 - `fields`: 렌더링 가능한 필드 배열 (각 항목에 고유한 id 포함)
 - `append`, `remove`: 필드 추가 및 삭제 함수
 - `register`: 각 필드에 등록
 
 ## shouldUnregister
+
 컴포넌트가 unmount될 때 해당 필드를 폼 상태에서 제거할지 결정하는 옵션
+
 > 특정 조건에 따라 필드를 보여주거나 숨김(ex. 드롭다운 '기타' 추가 입력란)
 
 기본값 : false (true : 언마운트된 필드는 폼에서 완전히 사라지고 검증 대상에서도 제외)
 
 ### Zod 연동시 주의사항
+
 React Hook Form과 Zod는 서로 다른 기준으로 동작
 
 - React Hook Form : 언마운트된 필드를 실제 폼 상태(state)에서 제거
 - Zod : 검증할 때 정의된 스키마 전체를 기준으로 동작
 
-=> 즉, shouldUnregister를 true로 설정해놓아도 검증 시도
+=&gt; 즉, shouldUnregister를 true로 설정해놓아도 검증 시도
 
 ### Zod 연동시 해결 방법
+
 1. discriminatedUnion (추천)
-- 타입 안전성이 확실히 보장됨
-- 스키마만 봐도 어떤 조건에서 어떤 필드가 필요한지 명확함
-- 서버 스펙과 일치하여 디버깅이 쉬움
+  - 타입 안전성이 확실히 보장됨
+  - 스키마만 봐도 어떤 조건에서 어떤 필드가 필요한지 명확함
+  - 서버 스펙과 일치하여 디버깅이 쉬움
 
 ```ts
 const schema = z.discriminatedUnion('type', [
@@ -375,23 +390,27 @@ const form = useForm({
     }
 });
 ```
+
 type이 basic일때는 extra 필드가 아예 스키마에 존재하지 않음.
 
 2. refine/superRefine
-- 정말 복잡한 다중 필드 의존성이 있는 경우
-- 식별자 필드를 만들기 어려운 특수한 상황
+  - 정말 복잡한 다중 필드 의존성이 있는 경우
+  - 식별자 필드를 만들기 어려운 특수한 상황
 
 ## disabled
+
 필드를 비활성화하면서 **폼 상태에서도 빼는** 옵션. `Controller`의 `disabled` prop, `register('name', { disabled: true })`, `useForm({ disabled: true })`(폼 전체)
 
 > ⚠️ **resolver(zod)를 쓰면 검증을 건너뛰지 않는다.** disabled는 제출 데이터에서 필드를 빼주지만, 검증은 스키마 전체를 기준으로 그대로 돌아간다. `shouldUnregister`와 완전히 같은 원인 — RHF는 필드 상태를, zod는 스키마 전체를 기준으로 동작한다.
 
 실측 (rhf 7.72.0 / @hookform/resolvers 5.2.2 / zod 4.3.6)
 
-| 상태 | zod 검증 | onValid에 들어오는 값 |
-|---|---|---|
-| 일반 | 오류 발생 | `{ detail: '', name: '이름' }` |
-| `disabled` | **오류 그대로 발생** | `{ name: '이름' }` — 필드가 사라짐 |
+
+| 상태         | zod 검증        | onValid에 들어오는 값              |
+| ---------- | ------------- | ---------------------------- |
+| 일반         | 오류 발생         | `{ detail: '', name: '이름' }` |
+| `disabled` | **오류 그대로 발생** | `{ name: '이름' }` — 필드가 사라짐   |
+
 
 ### 여기서 나오는 함정 2개
 
@@ -429,20 +448,33 @@ const toRequest = (values: FormValues) => ({
 ```
 
 ## mode
+
 검증을 **언제** 돌릴지 결정하는 `useForm` 옵션. 기본값은 `'onSubmit'`
 
-| mode | 검증 시점 |
-|---|---|
-| `onSubmit` (기본) | 제출할 때 |
-| `onChange` | 값이 바뀔 때마다 |
-| `onBlur` | 포커스가 빠질 때 |
-| `onTouched` | 첫 blur 이후부터 change마다 |
-| `all` | blur + change |
 
-- `reValidateMode`(기본 `'onChange'`)는 **제출 이후**의 재검증 시점이다. `mode: 'onSubmit'`이어도 한 번 제출한 뒤에는 값을 고치는 즉시 오류 문구가 갱신·해제된다.
+| mode            | 검증 시점     |
+| --------------- | --------- |
+| `onSubmit` (기본) | 제출할 때     |
+| `onChange`      | 값이 바뀔 때마다 |
+| `onBlur`        | 포커스가 빠질 때 |
+
+
+- `reValidateMode`(기본값: `'onChange'`)는 **제출 이후**의 재검증 시점이다. `mode: 'onSubmit'`이어도 한 번 제출한 뒤에는 값을 고치는 즉시 오류 문구가 갱신·해제된다.
 - 그래서 "제출했을 때 문구를 보여주고, 고치면 바로 사라진다"는 흐름은 `mode: 'onSubmit'` + `reValidateMode` 기본값 조합이 그대로 만들어 준다. 별도 처리 필요 없음.
 
+### reValidateMode를 onBlur로 내리는 경우
+
+제출한 뒤 타이핑하는 동안 문구가 글자마다 붙었다 떨어지는 게 거슬리면 `reValidateMode`를 `'onBlur'`로 내린다.
+
+```ts
+mode: 'onSubmit',         // 첫 제출 전에는 errors가 비어 있어 문구가 아예 안 뜬다
+reValidateMode: 'onBlur', // 제출 뒤에는 blur마다 갱신
+```
+
+인라인 문구에 `submitCount > 0` 같은 게이팅을 따로 걸 필요가 없다. `mode: 'onSubmit'`이면 제출 전 `errors`가 빈 객체라 `errors.foo?.message`가 그대로 `undefined`다.
+
 ### isValid로 제출 버튼을 막을 때
+
 `formState.isValid`는 **mode와 무관하게** RHF가 resolver를 돌려 동기화한다. 실측하면 초기 1렌더는 `false`였다가 마운트 중 실제 값으로 바뀐다.
 
 ```
@@ -479,11 +511,13 @@ function App() {
 }
 ```
 
-| 순서 | 동작 | 기대 | 실제 |
-|---|---|---|---|
-| 1 | `abc` 입력 → 초기화 클릭 | 입력창이 빈다 | **`abc`가 그대로 남는다** |
-| 2 | `xyz` 입력 → 초기화 클릭 | 입력창이 빈다 | **`xyz`가 그대로 남는다** |
-| 3 | `q` 입력 → 제출 | `{ keyword: 'q' }` | **`{ keyword: '' }`** |
+
+| 순서  | 동작                | 기대                 | 실제                    |
+| --- | ----------------- | ------------------ | --------------------- |
+| 1   | `abc` 입력 → 초기화 클릭 | 입력창이 빈다            | `**abc`가 그대로 남는다**    |
+| 2   | `xyz` 입력 → 초기화 클릭 | 입력창이 빈다            | `**xyz`가 그대로 남는다**    |
+| 3   | `q` 입력 → 제출       | `{ keyword: 'q' }` | `**{ keyword: '' }**` |
+
 
 증상은 두 개다.
 
@@ -494,20 +528,24 @@ function App() {
 
 ### 세 조건이 겹쳐야 터진다
 
-| 조건 | 아니면 |
-|---|---|
-| RHF **7.60.0 이상** | 7.59 이하는 정상 |
-| 인자를 넘긴 **`reset(값)`** | 인자 없는 `reset()`은 정상 |
+
+| 조건                                                              | 아니면                        |
+| --------------------------------------------------------------- | -------------------------- |
+| RHF **7.60.0 이상**                                               | 7.59 이하는 정상                |
+| 인자를 넘긴 `**reset(값)**`                                           | 인자 없는 `reset()`은 정상        |
 | 비제어(`register`) + reset 뒤에 **그 `register(...)` 호출이 다시 평가되지 않음** | `Controller`거나, 다시 평가되면 정상 |
+
 
 세 번째 조건 때문에 **같은 코드가 프로젝트마다 다르게 동작한다.** 위 재현 코드로 실측한 표다.
 
-| | 1번째 초기화 | 2번째 초기화 | 초기화 후 입력→제출 |
-|---|---|---|---|
-| `register` | X | X | X |
-| `register` (React Compiler 끔) | O | O | O |
-| `register` + `keepFieldsRef: true` | O | **X** | O |
-| `Controller` | O | O | O |
+
+|                                    | 1번째 초기화 | 2번째 초기화 | 초기화 후 입력→제출 |
+| ---------------------------------- | ------- | ------- | ----------- |
+| `register`                         | X       | X       | X           |
+| `register` (React Compiler 끔)      | O       | O       | O           |
+| `register` + `keepFieldsRef: true` | O       | **X**   | O           |
+| `Controller`                       | O       | O       | O           |
+
 
 React Compiler를 끄면 버그가 사라진다. 하지만 컴파일러를 안 쓰더라도 **입력창이 `memo` 자식 안에 있으면 똑같이 터진다.** 진짜 조건은 "React Compiler"가 아니라 **"reset 뒤에 그 필드가 다시 `register`되지 않는다"** 쪽이다.
 
@@ -545,10 +583,12 @@ flowchart LR
 
 `reset`이 내부에서 관리하는 게 **두 개**인데, 이름이 비슷해서 헷갈린다.
 
-| 이름 | 정체 | 비유 |
-|---|---|---|
-| `_fields` | 필드별 ref 보관함 | 입력창 **리모컨 보관함** |
+
+| 이름             | 정체              | 비유                |
+| -------------- | --------------- | ----------------- |
+| `_fields`      | 필드별 ref 보관함     | 입력창 **리모컨 보관함**   |
 | `_names.mount` | 지금 등록된 필드 이름 목록 | 리모컨을 **누를 대상 명단** |
+
 
 `reset(값)`을 부르면 이렇게 동작한다.
 
@@ -568,10 +608,12 @@ reset(nextDefaultValues, { keepFieldsRef: true })
 
 이걸 켜면 **1번(리모컨 보관함)은 지켜진다.** 그래서 두 증상 중 하나는 확실히 사라진다.
 
-| 증상 | `keepFieldsRef`로 해결? |
-|---|---|
-| 초기화 이후 입력한 값이 제출 데이터에 안 실림 | ✅ 해결 (리모컨이 살아있음) |
-| 초기화해도 화면에 이전 글자가 남음 | ⚠️ **첫 번째 reset만** |
+
+| 증상                         | `keepFieldsRef`로 해결? |
+| -------------------------- | -------------------- |
+| 초기화 이후 입력한 값이 제출 데이터에 안 실림 | ✅ 해결 (리모컨이 살아있음)     |
+| 초기화해도 화면에 이전 글자가 남음        | ⚠️ **첫 번째 reset만**   |
+
 
 문제는 **2번(명단)은 여전히 비워진다**는 것. 그리고 `keepFieldsRef`가 화면을 되돌릴 때 이렇게 돈다.
 
@@ -626,16 +668,18 @@ React Compiler 끔  reset 후  _names.mount=['keyword']  _fields=['keyword']   �
 
 실제 화면에서 후보를 다 돌려본 결과다. 시나리오는 **URL 쿼리스트링으로 검색 조건을 받는 목록 화면**이고, "재진입"은 같은 쿼리스트링으로 다시 들어와 `reset(쿼리값)`이 한 번 더 도는 상황이다.
 
-| 해법 | 재진입 반영 | 재진입 후 초기화 | 초기화 2회 | 초기화 후 입력→조회 |
-|---|---|---|---|---|
-| `reset(values)` | X | X | X | X |
-| `keepFieldsRef` 단독 | X | X | X | X |
-| `keepFieldsRef` + 강제 리렌더 | X | X | X | X |
-| `useForm({ values })` | X | X | X | X |
-| `resetField` + DOM 직접 조작 | O | O | O | **X** |
-| `keepFieldsRef` + `register()` 재등록 | O | O | O | O |
-| `keepFieldsRef` + `setValue()` | O | O | O | O |
-| **`Controller`** | **O** | **O** | **O** | **O** |
+
+| 해법                                 | 재진입 반영 | 재진입 후 초기화 | 초기화 2회 | 초기화 후 입력→조회 |
+| ---------------------------------- | ------ | --------- | ------ | ----------- |
+| `reset(values)`                    | X      | X         | X      | X           |
+| `keepFieldsRef` 단독                 | X      | X         | X      | X           |
+| `keepFieldsRef` + 강제 리렌더           | X      | X         | X      | X           |
+| `useForm({ values })`              | X      | X         | X      | X           |
+| `resetField` + DOM 직접 조작           | O      | O         | O      | **X**       |
+| `keepFieldsRef` + `register()` 재등록 | O      | O         | O      | O           |
+| `keepFieldsRef` + `setValue()`     | O      | O         | O      | O           |
+| `**Controller**`                   | **O**  | **O**     | **O**  | **O**       |
+
 
 통과하는 건 세 개인데, 아래 둘은 **"reset을 부르는 모든 자리에서 그 필드를 손으로 되살린다"** 는 약속을 계속 지켜야 한다. 나중에 `register` 필드를 하나 더 추가하면 조용히 재발한다. `Controller`는 지킬 약속이 없다.
 
@@ -658,10 +702,12 @@ if (keepStateOptions.keepFieldsRef) {
 
 그럼 언제 남기나. 기준은 화면 종류가 아니라 **그 폼에 비제어 필드가 있는지**다.
 
-| 폼 | `register` 입력 | `keepFieldsRef` |
-|---|---|---|
-| 검색·필터 폼 (필드 몇 개, 전부 `Controller`) | 없음 | **지운다** |
-| 상세·등록 폼 (입력 수십 개, `register` 기반) | 있음 | **남긴다** — 없으면 `reset`이 화면을 못 채운다 |
+
+| 폼                                 | `register` 입력 | `keepFieldsRef`                  |
+| --------------------------------- | ------------- | -------------------------------- |
+| 검색·필터 폼 (필드 몇 개, 전부 `Controller`) | 없음            | **지운다**                          |
+| 상세·등록 폼 (입력 수십 개, `register` 기반)  | 있음            | **남긴다** — 없으면 `reset`이 화면을 못 채운다 |
+
 
 상세 폼처럼 `register`가 실제로 이득인 자리에서는 이 옵션이 `reset`을 동작하게 만드는 유일한 수단이다. 지우면 조회한 값이 입력창에 안 뜬다.
 
@@ -669,10 +715,12 @@ if (keepStateOptions.keepFieldsRef) {
 
 `Controller`는 키 입력 1회당 그 필드를 1번 다시 그린다. 실측(rhf 7.72.0 / react 19.2.4).
 
-| | 마운트 | 6글자 입력 | 초기화 클릭 |
-|---|---|---|---|
+
+|               | 마운트                | 6글자 입력      | 초기화 클릭  |
+| ------------- | ------------------ | ----------- | ------- |
 | `register` 계열 | parent 2 / input 2 | **+0 / +0** | +1 / +1 |
-| `Controller` | parent 2 / input 2 | +0 / **+6** | +1 / +1 |
+| `Controller`  | parent 2 / input 2 | +0 / **+6** | +1 / +1 |
+
 
 300타 입력 시간(3회 반복)은 `register` 계열 타당 **0.05ms**, `Controller` 타당 **0.16~0.19ms**.
 3~4배지만 절대값이 **타당 +0.1ms**다. 프레임 예산 16ms에 비하면 감지 불가다.
@@ -700,7 +748,7 @@ const formState = useFormState({ control, name, exact })
 중요한 건 두 가지다.
 
 - **부모 폼은 두 방식 모두 리렌더되지 않는다**(+0). `Controller` 비용은 그 필드 서브트리에 갇힌다.
-  "제어로 바꾸면 폼 전체가 다시 그려진다"는 오해다.
+"제어로 바꾸면 폼 전체가 다시 그려진다"는 오해다.
 - 그래서 **판단 기준은 성능이 아니라 정합성**이다. 리스트가 수백 행이거나 입력 컴포넌트가 무거운 경우에만 성능을 따진다.
 
 ### 곁가지 — useForm({ values })의 deepEqual
@@ -729,4 +777,7 @@ if (props.values && !deepEqual(props.values, _values.current)) {
 그리고 `Controller`로 바꿨으면 `keepFieldsRef`는 같이 지운다 — 남겨두면 원인이 두 개인 것처럼 보인다.
 
 ## 참고자료
+
 [왜 shouldUnregister: true인데 검증 에러가 발생할까?](https://toby2009.tistory.com/83#shouldUnregister%EB%8A%94%20%EB%AC%B4%EC%97%87%EC%9D%B8%EA%B0%80%3F-1-1)
+
+[useForm — mode / reValidateMode (공식 문서)](https://react-hook-form.com/docs/useform#reValidateMode)
