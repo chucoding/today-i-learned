@@ -489,6 +489,69 @@ reValidateMode: 'onBlur', // 제출 뒤에는 blur마다 갱신
   - **즉시 차단** : `isValid` 게이트를 쓰되 왜 못 누르는지 별도로 안내
 - 초기 1렌더가 `false`라 `isValid` 게이트는 마운트 시 버튼이 잠깐 비활성→활성으로 깜빡인다.
 
+### 제출 이후 재검증 대상은 "오류가 있는 필드"가 아니다
+
+공식 문서는 `reValidateMode`를 "**inputs with errors** get re-validated after a user submits the form"으로 설명한다. 구현은 그보다 넓다. 7.72.0의 `skipValidation`은 그 필드가 오류를 들고 있는지 보지 않고 `isSubmitted`와 `reValidateMode`만 본다.
+
+```js
+var skipValidation = (isBlurEvent, isTouched, isSubmitted, reValidateMode, mode) => {
+    if (mode.isOnAll) return false
+    else if (!isSubmitted && mode.isOnTouch) return !(isTouched || isBlurEvent)
+    else if (isSubmitted ? reValidateMode.isOnBlur : mode.isOnBlur) return !isBlurEvent
+    else if (isSubmitted ? reValidateMode.isOnChange : mode.isOnChange) return isBlurEvent
+    return true
+}
+```
+
+한 번 제출한 뒤에는 그때까지 멀쩡했던 필드도 값을 바꾸는 순간 검증되고 오류 문구가 붙는다.
+
+| 상황 | `mode: 'onSubmit'` + `reValidateMode: 'onChange'` (둘 다 기본값) |
+| --- | --- |
+| 제출 전 | 문구 없음 |
+| 제출 후, 오류 필드를 고칠 때 | 입력 중 즉시 해제 (reward early) |
+| 제출 후, 정상 필드에 잘못된 값을 넣을 때 | 입력 중 즉시 오류 (punish **early**) |
+
+마지막 줄이 UX 패턴 원본과 어긋난다. 원본은 정상이던 필드의 새 오류를 blur까지 미루라고 한다.
+→ [폼검증.md](../UX패턴/폼검증.md)
+
+### reward early, punish late 구현
+
+기본값 조합은 "제출 후에는 전부 입력 중 검증"이라 원본 패턴의 절반만 맞다. 필드별로 나누려면 `reValidateMode`를 `'onBlur'`로 내리고, **오류가 붙어 있는 필드만** 입력 중에 직접 재검증한다.
+
+```tsx
+import { get, useForm, useFormState, type FieldPath } from 'react-hook-form'
+
+const { register, trigger, control } = useForm<FormValues>({
+  resolver: zodResolver(schema),
+  mode: 'onSubmit',
+  reValidateMode: 'onBlur', // 정상 필드는 blur까지 조용히 (punish late)
+})
+const { errors } = useFormState({ control })
+
+/** 오류가 붙어 있는 필드만 입력 중 재검증 (reward early) */
+const revalidateIfErrored = (name: FieldPath<FormValues>) => () => {
+  if (get(errors, name)) {
+    void trigger(name)
+  }
+}
+
+<input {...register('email', { onChange: revalidateIfErrored('email') })} />
+```
+
+- `register`의 `onChange` 옵션은 RHF 자체 change 핸들러 뒤에 붙는다. `reValidateMode: 'onBlur'`라 RHF는 change에서 검증을 건너뛰고 이 콜백의 `trigger`만 돈다.
+- 오류가 풀리면 `errors`에서 그 경로가 빠져 다음 타이핑부터 `trigger`가 호출되지 않는다. 원본 패턴이 말하는 "정상으로 돌아온 필드는 다시 blur 시점 검증으로"가 따로 코드 없이 성립한다.
+- 중첩 경로(`head.emailAddress`)는 `errors[name]`으로 못 읽으니 RHF가 내보내는 `get`을 쓴다.
+- `Controller`를 쓰는 필드는 `field.onChange(v)` 뒤에 같은 조건을 넣는다.
+
+7.72.0 + zodResolver로 두 방식을 실제로 돌려 비교한 결과다.
+
+| 조작 | 기본값 (`onChange`) | 위 구현 (`onBlur` + `trigger`) |
+| --- | --- | --- |
+| 제출 후 오류 필드 수정 (blur 없이) | 해제 | 해제 |
+| 제출 후 정상 필드에 오류값 입력 (blur 없이) | **오류 표시** | 표시 없음 |
+| 그 필드에서 blur | 오류 표시 | 오류 표시 |
+| 오류 표시된 뒤 다시 고칠 때 (blur 없이) | 해제 | 해제 |
+
 ## reset
 
 폼 값을 되돌리는 메서드. 여기서는 **인자를 넘긴 `reset(값)`이 비제어(`register`) 입력의 화면을 되돌리지 못하는** 버그를 다룬다.
@@ -776,8 +839,99 @@ if (props.values && !deepEqual(props.values, _values.current)) {
 **입력창 값이 폼 상태와 어긋나면 안 되는 필드는 처음부터 `Controller`로 두는 게 싸다.**
 그리고 `Controller`로 바꿨으면 `keepFieldsRef`는 같이 지운다 — 남겨두면 원인이 두 개인 것처럼 보인다.
 
+## subscribe
+
+렌더를 거치지 않고 폼 상태 변화를 받는 메서드(v7.55.0부터). `useForm`이 돌려준다.
+
+```tsx
+const { subscribe } = useForm<FormValues>()
+
+useEffect(
+  () =>
+    subscribe({
+      name: 'email',                        // 생략하면 폼 전체
+      formState: { errors: true },          // 감시할 상태만 켠다
+      callback: ({ errors, values }) => {}, // 켜둔 상태가 바뀔 때 호출
+    }),
+  [subscribe]
+)
+```
+
+| 읽는 방법 | 쓰는 자리 |
+| --- | --- |
+| `useForm`이 준 `formState.errors` | 그 컴포넌트에서 바로 그려낼 때 |
+| `useFormState` | 자식 컴포넌트만 리렌더시키고 싶을 때 |
+| `subscribe` | 렌더 밖에서 값을 받아야 할 때. 부수효과, 로깅, 그리고 아래의 참조 문제 |
+
+- 반환값이 해제 함수라 `useEffect`에서 그대로 return하면 정리된다. 안 하면 구독이 쌓인다.
+- 콜백이 받는 객체는 변경분만이 아니다. `{ values, ...현재 폼 상태, ...변경분, defaultValues }` 형태라 `errors`만 켜둔 구독에서도 `submitCount`를 함께 읽을 수 있다.
+- `formState`에 켤 수 있는 값은 `FormStateProxy`의 키 전체에 `values`, `isSubmitted`, `submitCount`가 더해진 형태다(7.72.0 `ReadFormState`). 공식 문서 목록에는 뒤 세 개가 빠져 있는데 타입에는 있다.
+
+### errors 객체는 제자리 변경된다
+
+증상부터 적으면 이렇다. 저장을 눌러 오류 목록이 한 번 뜬 뒤 다른 필드에 잘못된 값을 넣으면, **그 필드의 테두리와 툴팁은 오류로 바뀌는데 상단 오류 목록은 저장 시점 그대로 멈춰 있다.** 한 화면이 서로 다른 오류를 가리킨다.
+
+원인은 RHF가 필드별 재검증에서 `errors`를 새로 만들지 않고 제자리 변경한 뒤 **같은 참조**를 다시 흘려보내는 것이다. 7.72.0 `shouldRenderByError`가 그대로 보여준다.
+
+```js
+error
+    ? set(_formState.errors, name, error)   // 기존 객체를 제자리 변경
+    : unset(_formState.errors, name)
+...
+_subjects.state.next({
+    ...fieldState,
+    errors: _formState.errors,   // 직전 렌더와 같은 객체
+    name,
+})
+```
+
+`setError`도 같은 방식이다. 그래서 결과가 갈린다.
+
+- 필드 컴포넌트는 매 렌더 `errors.email`을 새로 읽으니 정상이다.
+- `useMemo(() => build(errors), [errors])`로 만든 파생 목록은 **재계산되지 않는다.**
+- 의존성에 `submitCount`를 같이 넣어두면 제출할 때는 값이 올라가 통과한다. 그래서 **제출 직후에는 맞고 제출 이후 재검증에서만 틀린다.** 원인을 찾기 어려운 이유다.
+
+`useMemo`를 지워도 끝나지 않는다. React Compiler(`babel-plugin-react-compiler`)를 켜두면 컴파일러가 같은 메모이제이션을 다시 만든다. dev 서버가 변환한 결과를 열어보면 그대로 나온다.
+
+```js
+let t0;
+if ($[0] !== formState.errors || $[1] !== formState.submitCount) {
+  t0 = formState.submitCount > 0 ? buildErrorItems(formState.errors) : [];
+  ...
+} else {
+  t0 = $[2];   // errors 참조가 같으니 옛 배열을 그대로 쓴다
+}
+```
+
+컴파일러는 렌더에서 읽는 값이 불변이라고 가정하는데 RHF가 그 가정을 깬다. `'use no memo'` 지시문으로 컴포넌트를 컴파일러에서 빼는 길도 있지만 그 컴포넌트 전체의 메모이제이션을 포기하는 대가가 크다. **렌더 시점 파생을 손보는 대신 변경 알림에서 값을 받아 state에 담는 편이 낫다.**
+
+```tsx
+const { subscribe } = methods
+
+const [errorItems, setErrorItems] = useState<ErrorItem[]>([])
+useEffect(
+  () =>
+    subscribe({
+      formState: { errors: true, submitCount: true },
+      callback: ({ errors, submitCount }) =>
+        setErrorItems((submitCount ?? 0) > 0 ? buildErrorItems(errors ?? {}) : []),
+    }),
+  [subscribe]
+)
+```
+
+- 콜백이 받는 값은 알림 시점의 실제 내용이라 참조가 같은지와 무관하다.
+- `useFormState`로 바꾸는 것은 해결이 아니다. 같은 `errors` 객체를 돌려주므로 파생을 메모이제이션하는 순간 같은 문제가 된다.
+
+> 💡 `errors.email?.message`처럼 필드에서 바로 읽는 코드는 이 문제를 겪지 않는다. **여러 필드의 오류를 모아 하나로 만드는 파생**에서만 터진다. 그런 화면은 제출 이후 재검증까지 눌러보고 파생된 쪽과 필드 표시가 같은 오류를 가리키는지 확인한다.
+> → [폼검증.md](../UX패턴/폼검증.md)
+
 ## 참고자료
 
 [왜 shouldUnregister: true인데 검증 에러가 발생할까?](https://toby2009.tistory.com/83#shouldUnregister%EB%8A%94%20%EB%AC%B4%EC%97%87%EC%9D%B8%EA%B0%80%3F-1-1)
 
 [useForm — mode / reValidateMode (공식 문서)](https://react-hook-form.com/docs/useform#reValidateMode)
+
+[useForm subscribe](https://react-hook-form.com/docs/useform/subscribe)
+
+[Inline validation in forms: designing the experience (reward early, punish late)](https://medium.com/wdstack/inline-validation-in-forms-designing-the-experience-123fb34088ce)
