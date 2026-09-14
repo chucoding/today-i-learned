@@ -5,6 +5,30 @@
 - version -&gt; frontend -&gt; phases -&gt; artifacts -&gt; cache 구조
 - pnpm 사용시 전역 설치하되 저장소 버전 10.15.1로 고정
 
+## 빌드 설정 파일명은 amplify.yml 고정
+
+YAML 확장자는 `.yaml` 이 표준 선호다. IANA 미디어 타입 등록(`application/yaml`, RFC 9512)이
+이렇게 적는다.
+
+> File extension(s): **"yaml" (preferred)** and "yml"
+
+`.yml` 3글자는 DOS 8.3 파일명 제약이 남긴 흔적이고 지금은 안전성 이점이 없다. 그래서 새로
+만드는 YAML 파일은 `.yaml` 이 맞다.
+
+**그런데 Amplify 빌드 설정만은 예외다.** Amplify 가 `amplify.yml` 이라는 이름으로만 찾는다.
+
+> Save the build settings in your repository - Download the `amplify.yml` file and add it
+> to the root of your repository.
+
+`amplify.yaml` 로 바꾸면 어떻게 되나:
+
+- Amplify 가 파일을 못 찾는다
+- 에러를 내지 않고 **콘솔에 저장된 빌드 설정으로 조용히 되돌아간다**
+- 파일에 적어둔 Node 버전, 패키지 매니저, 캐시 경로가 전부 무시된다
+- 빌드는 성공하는데 결과만 다르므로 원인을 찾기 어렵다
+
+AWS 문서 여러 페이지에서 표기를 세어봐도 `amplify.yml` 만 나오고 `amplify.yaml` 은 0건이다.
+
 ## 도메인 설정
 
 Amplify 콘솔 '호스팅' -&gt; '사용자 지정 도메인' 메뉴에서 간편하게 연결
@@ -87,5 +111,7 @@ aws amplify update-branch --app-id <app-id> --branch-name <branch> --environment
 
 # 참고자료
 [환경 변수 설정](https://docs.aws.amazon.com/ko_kr/amplify/latest/userguide/environment-variables.html)
+[빌드 설정 구성 (amplify.yml 파일명 근거)](https://docs.aws.amazon.com/amplify/latest/userguide/build-settings.html)
+[RFC 9512 — application/yaml 미디어 타입](https://www.rfc-editor.org/rfc/rfc9512.html)
 [AWS 빌드 설정 예제](https://docs.aws.amazon.com/amplify/latest/userguide/yml-specification-syntax.html)
 [Storybook 배포 가이드](https://storybook.js.org/docs/sharing/publish-storybook)
