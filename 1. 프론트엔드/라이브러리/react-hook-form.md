@@ -18,6 +18,7 @@ DOM/ref와 내부 store가 입력값을 들고, 필요한 곳만 subscribe해서
 ## 사용 방법
 
 - Input같은 비제어 컴포넌트는 uncontrolled 방식으로 사용하는 것이 효율적
+  - 단 **효율** 얘기다. 표시값 가공은 `register` 로도 되지만 커서 보정이 남고, 화면이 폼 상태와 어긋나면 안 되는 필드는 `Controller` 가 맞다 → [1.7](#17-register-와-표시값-가공), [reset](#reset)
 - 폼이 길어도 하나에 정의하는 것이 효율적
   - **watch() 최적화**: 한 번만 호출하여 전체 폼 값 추적(분리된 각 섹션마다 호출시 비효율적)
   - **리렌더링 최소화**: 불필요한 컴포넌트 분리로 인한 추가 리렌더링 방지
@@ -280,9 +281,58 @@ export default function App() {
 
 ### 1.6. 그 외
 
-- MUI, ANTD 등 다른 라이브러리 컴포넌트 사용시 제약있을 수 있음. 그에 따라 Controller등 다른 훅 사용해야함.
+- MUI, ANTD 등 다른 라이브러리 컴포넌트는 `onChange` 시그니처에 따라 `register` 가 아예 안 붙는다 → [1.7](#17-register-와-표시값-가공)
 - 상태관리 필요없지만 사용중인 상태관리와 통합할 수 있음.
 - ZOD등의 스키마 validation 체크 도구와 통합 가능.
+
+### 1.7. register 와 표시값 가공
+
+표시값을 가공하는 것 자체는 `register` 로도 **된다.** 다만 같이 걸어야 하는 옵션이 있고, 커서가 남는다.
+
+#### 1. 표시값과 저장값 분리 — setValueAs 를 같이 걸어야 한다
+
+`register` 는 비제어라 `value` 를 넘길 자리가 없지만, `onChange` 옵션에서 `e.target.value` 를 덮어쓰면 화면에 보이는 값을 바꿀 수 있다.
+
+```tsx
+<input {...register('amount', {
+  onChange: (e) => { e.target.value = comma(e.target.value) },   // 표시값 가공
+  setValueAs: (v) => String(v ?? '').replace(/,/g, ''),          // 저장값 복원
+})} />
+```
+
+**`setValueAs` 를 빼면 두 번째 입력부터 저장값이 오염된다.** RHF 는 `onChange` 옵션을 부르기 **전에** DOM 값을 읽어 저장하는데, 그 시점의 DOM 에는 직전에 넣은 콤마가 이미 들어 있다.
+
+실측 (rhf 7.x / react 19 / jsdom · 한 글자씩 입력).
+
+| 입력 | 표시 | 저장 (`setValueAs` 없이) |
+| --- | --- | --- |
+| `1234` | `1,234` | `1234` |
+| `12345` | `12,345` | `1,2345` |
+| `1234567` | `1,234,567` | `123,4567` |
+
+`setValueAs` 를 걸면 `1234567` 로 정상이다. **첫 입력만 확인하면 멀쩡해 보여 놓치기 쉽다.**
+
+남는 건 커서다. `1,234,567` 의 앞쪽에 한 글자를 끼워넣으면 커서가 4 에서 10(맨 뒤)으로 튄다. 구분자가 들어가면서 문자열 길이가 변하는데, `register` 에는 `selectionStart` 를 원본 기준 위치로 환산해 되돌릴 자리가 마땅치 않다. `Controller` 는 `value` 를 쥐고 있어 그 보정을 컴포넌트 안에 넣을 수 있다.
+
+> 그래서 판단 기준은 **가능·불가능이 아니라 커서 보정을 어디에 두느냐**다.
+> 포커스 중에는 숫자만, 벗어나면 하이픈처럼 **상태에 따라 표시가 달라지는 입력**이면 `Controller` 가 낫다.
+
+#### 2. onChange 가 DOM 이벤트가 아닌 컴포넌트 — 이건 못 붙인다
+
+`register(name)` 이 돌려주는 `onChange` 는 DOM 이벤트를 받아 `e.target.value` 를 읽는다. 컴포넌트가 값 자체를 넘기는 시그니처면 어긋난다.
+
+```ts
+// 이런 컴포넌트에는 register 불가
+onChange?: (digits: string) => void
+```
+
+`{...register('phone')}` 을 그대로 spread 하면 RHF 가 문자열에서 `.target.value` 를 읽어 **`undefined` 를 저장한다.** 타입 에러도 런타임 에러도 안 난다. 값만 조용히 비는 것이 이 실수의 유일한 증상이다.
+
+Select · DatePicker · 전화번호 입력처럼 **자체 포맷을 갖는 입력**이 대개 여기 해당한다. 라이브러리 이름이 아니라 `onChange` 시그니처로 판별하면 된다.
+
+> 반대로 `setValue` 는 `register` 필드에서도 DOM 표시값까지 갱신한다. RHF 가 저장해 둔 ref 로 직접 쓰기 때문이다.
+> 주소 검색 결과 주입이나 자동 채번처럼 **값을 밖에서 밀어넣기만** 하는 경우는 `register` 로 충분하다.
+> 되돌리는 쪽(`reset`)이 안 되는 것과는 별개다 → [reset](#reset)
 
 ## 2. useController
 
