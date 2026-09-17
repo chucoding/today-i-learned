@@ -93,6 +93,20 @@ addons.setConfig({
 })
 ```
 
+## 컨트롤
+
+스토리의 `args` 를 화면에서 바꿔 보게 해 주는 애드온. (@storybook/addon-controls)
+
+### Canvas
+
+Canvas 패널은 `compact` 로 그려진다.
+
+`compact` 면 Description 과 Default 셀을 **아예 만들지 않는다.**
+
+### Docs
+
+`compact` 가 아니기 때문에 Name, Description, Default, Control이 다 보인다.
+
 ## 참고자료
 
 
@@ -108,5 +122,7 @@ addons.setConfig({
 | MDX                                    | [https://storybook.js.org/docs/writing-docs/mdx](https://storybook.js.org/docs/writing-docs/mdx)                                                                                                                                                                                                     |
 | Configure story loading                | [https://storybook.js.org/docs/configure/](https://storybook.js.org/docs/configure/)                                                                                                                                                                                                                 |
 | Structuring your Storybook             | [https://storybook.js.org/blog/structuring-your-storybook/](https://storybook.js.org/blog/structuring-your-storybook/)                                                                                                                                                                               |
+| Controls                               | [https://storybook.js.org/docs/essentials/controls](https://storybook.js.org/docs/essentials/controls)                                                                                                                                                                                               |
+| ArgTypes                               | [https://storybook.js.org/docs/api/arg-types](https://storybook.js.org/docs/api/arg-types)                                                                                                                                                                                                           |
 
 
