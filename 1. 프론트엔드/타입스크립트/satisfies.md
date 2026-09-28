@@ -2,7 +2,9 @@
 
 > [TypeScript 4.9 릴리스 노트](https://www.typescriptlang.org/docs/handbook/release-notes/typescript-4-9.html#the-satisfies-operator)
 
-값이 타입에 맞는지 검사만 하고 추론된 리터럴 타입은 그대로 남기는 연산자. TS 4.9(2022년 11월)부터 쓸 수 있다.
+값이 타입에 맞는지 검사만 하고 추론된 리터럴 타입은 그대로 남기는 연산자.
+
+TS 4.9(2022년 11월)부터 쓸 수 있다.
 
 ## 왜 쓰는가
 
@@ -12,11 +14,13 @@
 
 `["name", "age"]`를 `keyof User` 배열로 다룰 때
 
-| 방식 | 오타 검사 | 추론 결과 |
-|------|-----------|-----------|
-| `: (keyof User)[]` | O | `(keyof User)[]` |
-| `as (keyof User)[]` | 느슨함 (`["name", "nmae"]`도 통과) | `(keyof User)[]` |
-| `satisfies (keyof User)[]` | O | `("age" \| "name")[]` |
+
+| 방식                         | 오타 검사                        | 추론 결과                |
+| -------------------------- | ---------------------------- | -------------------- |
+| `: (keyof User)[]`         | O                            | `(keyof User)[]`     |
+| `as (keyof User)[]`        | 느슨함 (`["name", "nmae"]`도 통과) | `(keyof User)[]`     |
+| `satisfies (keyof User)[]` | O                            | `("age" | "name")[]` |
+
 
 ## 언제 안 쓰는가
 
@@ -44,3 +48,4 @@ USER_LABELS.name.toUpperCase(); // OK, name은 string으로 남음
 const COLUMNS = ["name", "age"] as const satisfies readonly (keyof User)[];
 // typeof COLUMNS === readonly ["name", "age"]
 ```
+
