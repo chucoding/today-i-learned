@@ -74,6 +74,8 @@ App에서 `useQuery`를 직접 많이 쓰기보다, **쿼리 정의( queryOption
 
 이렇게 하면 ownership은 entity/feature/page에 남고, App은 조립(orchestration)만 담당하게 된다.
 
+쿼리 키를 어느 슬라이스와 세그먼트에 둘지는 [query-key.md](./query-key.md) 참고.
+
 ### 주의사항
 - **SSR(Next.js 등):** TanStack Query SSR 가이드는 **파일 루트에 QueryClient singleton을 만들지 말 것**을 권한다. 요청 간 캐시 공유 위험. SPA/CSR이면 전역 인스턴스 예시가 무난할 수 있으나, SSR에서는 요청 단위로 request-safe 하게 생성하는 TanStack 권장 방식을 따르는 것이 안전하다. (FSD 예시의 `shared/api/query-client.ts` 단일 인스턴스는 SPA 기준.)
 - **App 세그먼트 네이밍:** FSD는 App/Shared에서 세그먼트 이름을 **형태(hooks, types, components)** 가 아니라 **목적**으로 짓도록 안내한다. `app/hooks`보다 `app/bootstrap`, `app/providers`, `app/session`, `app/routes`처럼 “왜 있는지” 드러나는 이름이 좋다.
