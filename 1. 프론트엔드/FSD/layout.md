@@ -30,6 +30,8 @@ FSD 레이아웃 배치 가이드
 - 레이아웃은 거의 바뀌지 않아 추상화 이득이 작음.
 
 > "The urge to abstract code is often very overrated. It is especially the case for layouts, which rarely change."
+>
+> 출처: [Page layouts | Feature-Sliced Design](https://feature-sliced.design/docs/guides/examples/page-layout)
 
 ## 라우터 레이아웃
 
