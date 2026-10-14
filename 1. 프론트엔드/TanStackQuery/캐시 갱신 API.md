@@ -4,6 +4,7 @@ invalidateQueries, resetQueries, removeQueries, clear 비교
 
 - [API별 차이](#api별-차이)
 - [뮤테이션 후 갱신 방식](#뮤테이션-후-갱신-방식)
+- [낙관적 업데이트](#낙관적-업데이트)
 - [removeQueries 주의점](#removequeries-주의점)
 - [refetch와 resetQueries](#refetch와-resetqueries)
 - [초기화 버튼](#초기화-버튼)
@@ -24,6 +25,18 @@ invalidateQueries, resetQueries, removeQueries, clear 비교
 - 무효화 Promise를 반환하면 재조회가 끝날 때까지 `isPending` 유지
 - 정렬된 목록처럼 직접 고치기 어려운 데이터에 안전함
 - 응답에 화면에 필요한 값이 전부 있을 때만 `setQueryData`로 직접 갱신
+  - 동기로 캐시를 바로 바꿈. 네트워크 요청 없음
+  - 불변 갱신 필수. 캐시에서 꺼낸 객체를 직접 고치지 않고 새 객체 반환
+
+## 낙관적 업데이트
+
+- 응답 전에 캐시를 먼저 바꿔 즉시 반영하는 방식. 성공 후 처리가 아니라 요청 전 처리
+- 좋아요, 토글처럼 즉각 반응이 중요할 때만 사용. 모든 뮤테이션에 필요하지 않음
+- `cancelQueries`: 진행 중인 재조회 취소. 늦게 온 응답이 낙관적 데이터를 덮어쓰는 것 방지
+
+1. `onMutate`: `cancelQueries` → 현재 값 저장 → `setQueryData`로 예상 값 기록 → 저장 값 반환
+2. `onError`: 저장 값으로 롤백
+3. `onSettled`: `invalidateQueries`로 서버와 다시 맞춤
 
 ## removeQueries 주의점
 
@@ -73,6 +86,8 @@ const handleReset = () => {
 | --- | --- |
 | 뮤테이션 후 무효화 권장 방식 | https://tanstack.com/query/latest/docs/framework/react/guides/invalidations-from-mutations |
 | API별 공식 동작 정의 | https://tanstack.com/query/latest/docs/reference/QueryClient |
+| 낙관적 업데이트의 취소, 기록, 롤백 흐름 | https://tanstack.com/query/latest/docs/framework/react/guides/optimistic-updates |
+| setQueryData 불변 갱신 주의 | https://tanstack.com/query/latest/docs/framework/react/guides/updates-from-mutation-responses |
 | 무효화와 직접 갱신 선택 기준 | https://tkdodo.eu/blog/mastering-mutations-in-react-query |
 | removeQueries가 리렌더하지 않는 이유 | https://github.com/TanStack/query/discussions/3399 |
 | refetch는 같은 파라미터 재요청 용도 | https://tkdodo.eu/blog/effective-react-query-keys |
