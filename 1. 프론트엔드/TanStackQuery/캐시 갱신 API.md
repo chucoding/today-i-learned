@@ -94,7 +94,7 @@ deletePostMutation.mutate(id, {
   - `refetch()`: `enabled`를 무시하고 요청함
   - `resetQueries`: 비활성 쿼리라 요청하지 않지만 데이터는 비움
 - 로딩 표시는 화면이 보는 상태값에 따름. `isFetching` 기준이면 `refetch`로도 로딩 표시됨
-  - `isPending`: 데이터 없음. 첫 로드 스켈레톤용
+  - `isPending`: 데이터 없음. 첫 로드 판정용
   - `isFetching`: 요청 실행 중. 데이터를 둔 채 재조회 표시용
 
 ## 초기화 버튼
