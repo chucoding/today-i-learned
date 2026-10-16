@@ -6,6 +6,7 @@ invalidateQueries, resetQueries, removeQueries, clear 비교
 - [뮤테이션 후 갱신 방식](#뮤테이션-후-갱신-방식)
 - [낙관적 업데이트](#낙관적-업데이트)
 - [removeQueries 주의점](#removequeries-주의점)
+- [삭제 뮤테이션](#삭제-뮤테이션)
 - [refetch와 resetQueries](#refetch와-resetqueries)
 - [초기화 버튼](#초기화-버튼)
 - [참고자료](#참고자료)
@@ -16,7 +17,7 @@ invalidateQueries, resetQueries, removeQueries, clear 비교
 | --- | --- | --- |
 | `invalidateQueries` | 데이터는 남기고 stale 표시, 활성 쿼리만 재조회 | 등록, 수정, 삭제 후 관련 목록 갱신 |
 | `resetQueries` | 캐시 데이터를 비우고(`initialData` 옵션이 있으면 그 값으로 교체) 활성 쿼리 재조회 | 이전 데이터를 화면에 남기면 안 될 때 |
-| `removeQueries` | 캐시에서 쿼리 삭제, 삭제 시점에는 재조회 없음 | 삭제된 항목의 상세처럼 다시 볼 일 없는 캐시 정리 |
+| `removeQueries` | 캐시에서 쿼리 삭제, 삭제 시점에는 재조회 없음 | 구독하는 화면이 이미 사라진 캐시 정리 |
 | `clear` | 쿼리 캐시와 뮤테이션 캐시 전부 비움 | 로그아웃, 사용자 전환 |
 
 ## 뮤테이션 후 갱신 방식
@@ -45,6 +46,40 @@ invalidateQueries, resetQueries, removeQueries, clear 비교
 - 다른 이유로 리렌더되는 순간 로딩 상태로 떨어지고 재조회 시작
 
 > If the page re-renders for some other reason, it will go back to `loading` state and start to fetch.
+>
+> 출처: [removeQueries doesn't always remove the query's cache](https://github.com/TanStack/query/discussions/3399)
+
+## 삭제 뮤테이션
+
+- 콜백 순서: 훅 정의의 `onSuccess` → `mutate(vars, { onSuccess })`
+  - 훅이 캐시를 만지는 시점에는 지운 항목의 상세가 아직 마운트 상태
+  - 상세를 `invalidateQueries`하면 바로 재조회해 404
+  - `removeQueries`해도 화면을 떠나기 전 리렌더가 끼면 재조회해 404. 배칭 타이밍에 따라 갈림
+- 권장: 훅은 목록만 무효화, 지운 상세는 그대로 둠
+  - 화면의 이동, 패널 닫기, 선택 해제가 구독을 끊음
+  - 남은 캐시는 `gcTime` 뒤 자동 정리
+  - 삭제 뮤테이션에서는 무효화 Promise를 반환하지 않음. 반환하면 목록 재조회가 끝날 때까지 `mutate` 콜백의 이동이 밀림
+- 함정
+  - 루트 키 무효화가 활성 상세까지 휩쓸어 404 재조회
+  - 훅이 인자로 받은 `options`를 자기 `onSuccess` 뒤에 펼치면 `options.onSuccess`가 훅의 무효화를 덮어씀. `mutate` 콜백의 `onSuccess`는 덮어쓰지 않음
+
+```ts
+export const useDeletePost = () => {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: deletePost,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: postKeys.list._def })
+    },
+  })
+}
+
+// 화면: 떠나는 동작은 mutate 콜백에서
+deletePostMutation.mutate(id, {
+  onSuccess: () => navigate(POST_LIST_PATH, { replace: true }),
+})
+```
 
 ## refetch와 resetQueries
 
@@ -90,6 +125,8 @@ const handleReset = () => {
 | setQueryData 불변 갱신 주의 | https://tanstack.com/query/latest/docs/framework/react/guides/updates-from-mutation-responses |
 | 무효화와 직접 갱신 선택 기준 | https://tkdodo.eu/blog/mastering-mutations-in-react-query |
 | removeQueries가 리렌더하지 않는 이유 | https://github.com/TanStack/query/discussions/3399 |
+| 활성 쿼리를 removeQueries로 지워도 리렌더 시 재조회 | https://github.com/TanStack/query/discussions/3169 |
+| 구독 정리는 컴포넌트를 내리는 쪽의 몫 | https://github.com/TanStack/query/discussions/1886 |
 | refetch는 같은 파라미터 재요청 용도 | https://tkdodo.eu/blog/effective-react-query-keys |
 | enabled false여도 refetch는 동작 | https://tanstack.com/query/latest/docs/framework/react/guides/disabling-queries |
 | isPending과 isFetching의 용도 | https://tanstack.com/query/latest/docs/framework/react/guides/background-fetching-indicators |
