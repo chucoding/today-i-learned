@@ -1,6 +1,16 @@
 # FSD 아키텍처
 기능 분할 설계(Feature-Sliced Design, FSD) 아키텍처. 프론트엔드 애플리케이션 구조를 위한 아키텍처 방법론으로, 컴포넌트 중심 UI 환경에서 복잡한 애플리케이션 구조를 체계적으로 조직한다.
 
+## 문서
+- [레이어](layer.md)
+- [슬라이스](slice.md)
+- [shared 레이어](shared.md)
+- [pages 레이어의 상태관리](pages.md)
+- [model 세그먼트](model.md)
+- [레이아웃](layout.md)
+- [쿼리 키 위치](query-key.md)
+- [TanStack Query](TanStackQuery.md)
+
 ## 핵심
 코드를 **수직(레이어)·수평(슬라이스)·기술 목적(세그먼트)** 로 나누어 재사용을 통제하고, 높은 응집도·낮은 결합도를 유지
 
