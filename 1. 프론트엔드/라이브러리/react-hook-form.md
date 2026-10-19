@@ -4,6 +4,20 @@ DOM/ref와 내부 store가 입력값을 들고, 필요한 곳만 subscribe해서
 
 > React Hook Form 공식 문서 : [React Hook Form](https://react-hook-form.com/)
 
+## 목차
+
+- [사용 방법](#사용-방법)
+- [1. useForm](#1-useform)
+- [2. useController](#2-usecontroller)
+- [3. useWatch](#3-usewatch)
+- [4. useFieldArray](#4-usefieldarray)
+- [shouldUnregister](#shouldunregister)
+- [disabled](#disabled)
+- [mode](#mode)
+- [reset](#reset)
+- [subscribe](#subscribe)
+- [참고자료](#참고자료)
+
 > 💡 useState vs react-hook-form 
 >
 > - useState의 경우 state가 입력값의 SOT인 **controlled** 방식
@@ -511,6 +525,7 @@ const toRequest = (values: FormValues) => ({
 
 - `reValidateMode`(기본값: `'onChange'`)는 **제출 이후**의 재검증 시점이다. `mode: 'onSubmit'`이어도 한 번 제출한 뒤에는 값을 고치는 즉시 오류 문구가 갱신·해제된다.
 - 그래서 "제출했을 때 문구를 보여주고, 고치면 바로 사라진다"는 흐름은 `mode: 'onSubmit'` + `reValidateMode` 기본값 조합이 그대로 만들어 준다. 별도 처리 필요 없음.
+  - 예외: resolver에서 다른 필드 값에 따라 풀리는 조건부 오류 → [values 구독으로 폼 전체 재검증](#values-구독으로-폼-전체-재검증)
 
 ### reValidateMode를 onBlur로 내리는 경우
 
@@ -976,12 +991,38 @@ useEffect(
 > 💡 `errors.email?.message`처럼 필드에서 바로 읽는 코드는 이 문제를 겪지 않는다. **여러 필드의 오류를 모아 하나로 만드는 파생**에서만 터진다. 그런 화면은 제출 이후 재검증까지 눌러보고 파생된 쪽과 필드 표시가 같은 오류를 가리키는지 확인한다.
 > → [폼검증.md](../UX패턴/폼검증.md)
 
+### values 구독으로 폼 전체 재검증
+
+- resolver를 쓰면 제출 이후 재검증은 바뀐 필드 하나만 스키마 결과를 되돌려 씀(7.72.0 `_runSchema([name])`)
+  - 다른 필드 값에 따라 풀리는 조건부 필수 오류는 그대로 남음
+  - 예: "사업자" 체크를 끄면 상호명 필수가 풀려야 하는데 상호명 오류가 계속 표시됨
+- 제출 이후에만 `values`를 구독해 값이 바뀔 때마다 이름 없이 `trigger()`를 호출해 폼 전체를 재검증
+
+```tsx
+const { subscribe, trigger } = methods
+const hasSubmitted = methods.formState.submitCount > 0
+
+useEffect(() => {
+  if (!hasSubmitted) return
+
+  return subscribe({
+    formState: { values: true },
+    callback: () => void trigger(),
+  })
+}, [hasSubmitted, subscribe, trigger])
+```
+
+- 기본 `reValidateMode`(`'onChange'`) 전제. `'onBlur'`로 내린 폼에서는 입력마다 바뀐 필드도 검증되어 punish late가 깨짐
+- `values` 구독은 `reset`, `setValue`처럼 사용자 입력이 아닌 값 변경에도 불림
+  - `reset`은 `errors`와 `submitCount`를 비우기 전에 `values`를 먼저 알림. 제출 뒤 `reset`하면 비운 폼에 오류가 다시 채워질 수 있음
+- 이름 없는 `trigger()`는 `_formState.errors`를 스키마 결과로 통째로 교체함. `setError`로 붙인 서버 오류도 함께 사라짐
+
 ## 참고자료
 
-[왜 shouldUnregister: true인데 검증 에러가 발생할까?](https://toby2009.tistory.com/83#shouldUnregister%EB%8A%94%20%EB%AC%B4%EC%97%87%EC%9D%B8%EA%B0%80%3F-1-1)
-
-[useForm — mode / reValidateMode (공식 문서)](https://react-hook-form.com/docs/useform#reValidateMode)
-
-[useForm subscribe](https://react-hook-form.com/docs/useform/subscribe)
-
-[Inline validation in forms: designing the experience (reward early, punish late)](https://medium.com/wdstack/inline-validation-in-forms-designing-the-experience-123fb34088ce)
+| TITLE | URL |
+| --- | --- |
+| shouldUnregister에서 검증 오류가 남는 이유 | https://toby2009.tistory.com/83#shouldUnregister%EB%8A%94%20%EB%AC%B4%EC%97%87%EC%9D%B8%EA%B0%80%3F-1-1 |
+| mode와 reValidateMode 기본 동작 | https://react-hook-form.com/docs/useform#reValidateMode |
+| subscribe 사용법과 옵션 | https://react-hook-form.com/docs/useform/subscribe |
+| subscribe 추가 버전(v7.55.0) | https://github.com/react-hook-form/react-hook-form/releases/tag/v7.55.0 |
+| reward early, punish late 검증 시점 | https://medium.com/wdstack/inline-validation-in-forms-designing-the-experience-123fb34088ce |
