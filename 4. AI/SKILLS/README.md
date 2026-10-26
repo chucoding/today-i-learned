@@ -5,6 +5,7 @@
 - [작성 방법](작성방법.md)
 - [배포](배포.md)
 - [grill-me](grill-me.md)
+- [Superpowers](superpowers.md)
 
 ## SKILL 활용
 
