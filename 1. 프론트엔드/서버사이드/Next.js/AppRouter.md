@@ -3,6 +3,39 @@
 Next.js 13부터 도입된 `app/` 디렉터리 기반 라우팅 방식.
 Pages Router와 가장 큰 차이는 **컴포넌트의 기본값이 서버 컴포넌트(React Server Component)** 라는 점.
 
+## 목차
+
+- [1. 폴더 구조 — 파일 이름이 곧 API](#1-폴더-구조--파일-이름이-곧-api)
+  - [라우팅 보조 규칙](#라우팅-보조-규칙)
+  - [요청 본문과 page](#요청-본문과-page)
+  - [라우트 분기 기준](#라우트-분기-기준)
+  - [정적 라우트와 동적 라우트 + 레지스트리](#정적-라우트와-동적-라우트--레지스트리)
+- [2. 서버 컴포넌트가 기본이다](#2-서버-컴포넌트가-기본이다)
+  - [흔한 오해](#흔한-오해)
+- [3. 'use client'는 "경계" 선언](#3-use-client는-경계-선언)
+  - [나쁜 예 — 페이지 전체를 클라이언트로](#나쁜-예--페이지-전체를-클라이언트로)
+  - [좋은 예 — 상호작용 부분만 잘라내기](#좋은-예--상호작용-부분만-잘라내기)
+  - [서버 컴포넌트를 클라이언트 안에 넣는 법](#서버-컴포넌트를-클라이언트-안에-넣는-법)
+  - [props 제약](#props-제약)
+- [4. 데이터는 서버에서 직접 조회](#4-데이터는-서버에서-직접-조회)
+  - [안티패턴 — 자기 Route Handler를 HTTP로 다시 호출](#안티패턴--자기-route-handler를-http로-다시-호출)
+  - [해결 — 조회 로직을 함수로 빼고 양쪽에서 공유](#해결--조회-로직을-함수로-빼고-양쪽에서-공유)
+  - [그럼 Route Handler는 언제 쓰나](#그럼-route-handler는-언제-쓰나)
+- [5. 독립 데이터는 병렬로 시작](#5-독립-데이터는-병렬로-시작)
+  - [같은 데이터를 여러 컴포넌트가 필요로 할 때](#같은-데이터를-여러-컴포넌트가-필요로-할-때)
+  - [preload 패턴](#preload-패턴)
+- [6. 느린 데이터는 Suspense 경계로](#6-느린-데이터는-suspense-경계로)
+  - [경계를 나누는 기준](#경계를-나누는-기준)
+- [7. 캐싱과 렌더링 모드](#7-캐싱과-렌더링-모드)
+- [8. 상태 변경: Server Actions](#8-상태-변경-server-actions)
+- [9. TanStack Query는 언제 쓰나](#9-tanstack-query는-언제-쓰나)
+- [10. 실습 과제](#10-실습-과제)
+  - [단계](#단계)
+  - [완료 기준](#완료-기준)
+- [11. 자주 하는 실수 체크리스트](#11-자주-하는-실수-체크리스트)
+- [12. 확인 문제](#12-확인-문제)
+- [참고자료](#참고자료)
+
 ## 1. 폴더 구조 — 파일 이름이 곧 API
 
 App Router는 폴더가 URL 경로, 파일 이름이 역할을 결정.
@@ -40,6 +73,59 @@ app/
 - `(group)` : URL에 포함되지 않는 폴더. 레이아웃 분리용. `app/(marketing)/about/page.tsx` → `/about`
 - `_folder` : 라우팅에서 완전히 제외되는 폴더. 컴포넌트/유틸 코로케이션용
 - `[id]` 동적, `[...slug]` catch-all, `[[...slug]]` optional catch-all
+
+### 요청 본문과 page
+
+- `page.tsx`가 받는 값은 `params`와 `searchParams`뿐. 요청 본문은 들어오지 않음.
+  - Next.js page 문서: Props는 `params`, `searchParams` 두 가지
+- 외부나 새 탭에서 URL로 직접 POST한 폼은 `route.ts`에서 받음.
+  - 화면은 HTML을 직접 응답하거나 303 redirect로 page 경로에 보냄.
+- 자기 앱 안의 폼은 Server Action으로도 처리 가능([8. 상태 변경: Server Actions](#8-상태-변경-server-actions))
+
+### 라우트 분기 기준
+
+- 파일 기반 라우팅은 URL 경로로만 분기함.
+- 핸들러 하나가 여러 대상을 받으면 레지스트리로 분기함.
+  - 판별 값이 요청 본문에 있을 때. 웹훅 수신이나 RPC 엔드포인트와 같은 구조
+  - 판별 값이 경로에 있어도 동적 라우트 하나로 받으면 레지스트리가 필요함.
+- 판별 값마다 정적 라우트를 두면 레지스트리 없이 라우팅에 맡김.
+
+> 💡 레지스트리란?
+> 식별 문자열을 처리 모듈로 바꾸는 대응표. 값은 모듈 자체이거나, 모듈을 불러오는 함수(지연 import)
+
+### 정적 라우트와 동적 라우트 + 레지스트리
+
+```ts
+// 정적 라우트: 폴더 경로가 곧 식별자
+// app/items/a/route.ts
+import { moduleA } from '@/modules/a'
+export const POST = createHandler(moduleA) // 모듈을 받아 POST 핸들러를 만드는 공용 함수
+
+// 동적 라우트: 레지스트리를 직접 관리
+// app/items/[...id]/route.ts
+const REGISTRY = new Map<string, () => Promise<Module>>([
+  ['a', () => import('@/modules/a').then((m) => m.moduleA)],
+]) // 일반 객체는 toString 같은 상속 키도 꺼내짐
+export async function POST(req: Request, { params }: { params: Promise<{ id: string[] }> }) {
+  const load = REGISTRY.get((await params).id.join('/'))
+  if (!load) return new Response(null, { status: 404 }) // 없는 키도 이 핸들러로 들어옴
+  return createHandler(await load())(req)
+}
+```
+
+| | 정적 라우트 | 동적 라우트 + 레지스트리 |
+| --- | --- | --- |
+| 등록 위치 | 모듈마다 `route.ts` 하나 | 중앙 파일 하나 |
+| 식별자 | 폴더 경로 | 손으로 적는 키 문자열 |
+| 코드 분할 | Next가 라우트 단위로 처리 | 레지스트리의 `import()`가 정함 |
+| 동시 작업 | 각자 다른 파일 추가 | 같은 파일에서 머지 충돌 |
+| 등록 누락 | Next가 404 | 핸들러가 직접 404 |
+
+- webpack은 `import()` 경로에 위치 정보가 있어야 코드를 나눔.
+  - webpack: `import(foo)`처럼 경로가 변수뿐이면 아무것도 번들되지 않고 실행 시 실패
+  - webpack: 템플릿 리터럴은 해당 디렉터리의 일치하는 파일을 모두 번들에 포함
+- 등록 누락은 두 방식 모두 테스트로 막음.
+  - 모듈 디렉터리를 glob으로 나열하고, 항목마다 짝이 되는 `route.ts`나 레지스트리 키가 있는지 대조
 
 ---
 
@@ -620,3 +706,7 @@ X. 서버에서 HTML로 렌더링된 뒤 브라우저에서 hydration됨. `'use 
 | Server Actions | https://nextjs.org/docs/app/getting-started/updating-data |
 | 스트리밍과 Suspense | https://nextjs.org/docs/app/api-reference/file-conventions/loading |
 | TanStack Query Advanced SSR | https://tanstack.com/query/latest/docs/framework/react/guides/advanced-ssr |
+| page와 route.ts 충돌 규칙 | [https://nextjs.org/docs/app/getting-started/route-handlers](https://nextjs.org/docs/app/getting-started/route-handlers) |
+| page가 받는 props | [https://nextjs.org/docs/app/api-reference/file-conventions/page](https://nextjs.org/docs/app/api-reference/file-conventions/page) |
+| 라우트 단위 코드 분할 | [https://nextjs.org/docs/app/glossary#code-splitting](https://nextjs.org/docs/app/glossary#code-splitting) |
+| import() 경로와 번들 범위 | [https://webpack.js.org/api/module-methods/#dynamic-expressions-in-import](https://webpack.js.org/api/module-methods/#dynamic-expressions-in-import) |
