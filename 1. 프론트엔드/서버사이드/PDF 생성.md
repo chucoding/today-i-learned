@@ -46,10 +46,12 @@ PDF 는 글자 좌표, 줄바꿈 위치, 쪽 경계가 확정된 결과물. 그�
 ## 주의점
 
 - 인쇄 CSS 로드 실패
-  - CSS 를 못 받아도 `page.pdf()` 는 오류 없이 PDF 를 냄. 쪽 나누기가 풀려 쪽이 빠질 수 있어 스타일시트 로드와 쪽 수를 확인해야 함.
+  - 인쇄 CSS 로드 실패는 `<link>` 의 `error` 이벤트로 감지 가능. `page.pdf()` 전에 그 `<link>` 의 `load` 이벤트나 `error` 이벤트를 확인.
 - Lambda 페이로드 한도
   - 동기 호출의 요청과 응답이 각각 6MB. 큰 문서와 PDF 는 S3 에 두고 키만 주고받음.
 - `fetch` 와 서명 주소 리다이렉트
+  > 💡 서명 주소(presigned URL): S3 객체에 정해진 시간 동안만 접근하도록 서명을 붙인 주소.
+  - 서버가 S3 키로 서명 주소를 만들어 브라우저에 넘기는 방식은 두 가지. 303 리다이렉트로 보내거나 JSON 으로 돌려줌.
   - `fetch` 가 303 을 따라 다른 출처(S3)로 가면 그 응답을 읽기 위해 S3 에 CORS 설정 필요. 서명 주소를 JSON 으로 받아 링크로 내려받는 편이 단순.
 
 ## 참고자료
@@ -58,7 +60,6 @@ PDF 는 글자 좌표, 줄바꿈 위치, 쪽 경계가 확정된 결과물. 그�
 | --- | --- |
 | pdf-lib 의 HTML, CSS 미지원 (Limitations) | [https://github.com/Hopding/pdf-lib](https://github.com/Hopding/pdf-lib) |
 | page.pdf() 의 print CSS 미디어 | [https://playwright.dev/docs/api/class-page#page-pdf](https://playwright.dev/docs/api/class-page#page-pdf) |
-| preferCSSPageSize 와 @page 크기 | [https://pptr.dev/api/puppeteer.pdfoptions](https://pptr.dev/api/puppeteer.pdfoptions) |
 | Node.js PDF 라이브러리 비교 (PDFKit, Puppeteer, jsPDF) | [https://reintech.io/blog/nodejs-pdf-generation-pdfkit-puppeteer-jspdf-comparison](https://reintech.io/blog/nodejs-pdf-generation-pdfkit-puppeteer-jspdf-comparison) |
 | HTML to PDF 라이브러리 선택 기준 | [https://dev.to/logrocket/best-html-to-pdf-libraries-for-nodejs-17f7](https://dev.to/logrocket/best-html-to-pdf-libraries-for-nodejs-17f7) |
 | Lambda 와 @sparticuz/chromium 구성 | [https://oneuptime.com/blog/post/2026-02-12-use-lambda-for-pdf-generation/markdown](https://oneuptime.com/blog/post/2026-02-12-use-lambda-for-pdf-generation/markdown) |
@@ -66,3 +67,4 @@ PDF 는 글자 좌표, 줄바꿈 위치, 쪽 경계가 확정된 결과물. 그�
 | 서버리스 Chromium 과 관리형 PDF API 대안 | [https://apitemplate.io/blog/html-to-pdf-aws-lambda-serverless-guide/](https://apitemplate.io/blog/html-to-pdf-aws-lambda-serverless-guide/) |
 | Lambda 동기 호출 6MB 한도 | [https://docs.aws.amazon.com/lambda/latest/dg/gettingstarted-limits.html](https://docs.aws.amazon.com/lambda/latest/dg/gettingstarted-limits.html) |
 | 교차 출처 응답의 Access-Control-Allow-Origin | [https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/CORS](https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/CORS) |
+| 스타일시트 load, error 이벤트 | [https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/link](https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/link) |
