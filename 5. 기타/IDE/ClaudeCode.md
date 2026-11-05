@@ -17,7 +17,7 @@
   - [비용과 캐시](#비용과-캐시)
   - [끄기](#끄기)
 - [응답 언어](#응답-언어)
-  - [왜 쓰는가](#왜-쓰는가)
+  - [사용 이유](#사용-이유)
   - [주입되는 지시](#주입되는-지시)
   - [설정 방법](#설정-방법-1)
   - [CLAUDE.md와의 차이](#claudemd와의-차이)
@@ -139,11 +139,9 @@ Plan mode => Opus / Execution mode => Sonnet 자동 전환
 
 `settings.json`의 `language`로 Claude Code의 응답 언어를 고정하는 설정
 
-### 왜 쓰는가
+### 사용 이유
 
-- 설정이 없으면 사용자 메시지를 보고 응답 언어를 짐작함
-  - 설정을 지웠을 때 들어가는 지시가 "사용자의 언어에 맞추라"는 문장
-- 짐작에 맡기면 한국어로 대화해도 도구 호출 뒤의 짧은 진행 안내가 영어로 넘어가는 일 발생
+- 설정이 없으면 고정된 응답 언어 없이 사용자 메시지를 보고 언어를 맞춤
 - `language`는 고정 목록이 없고 값을 그대로 "항상 그 언어로 응답하라"는 지시로 전달함
 
 > "Have Claude respond in a language other than English by default. There is no fixed list for responses: Claude Code passes the value verbatim to Claude as an instruction to always respond in that language, so any language name Claude can read works."
@@ -152,15 +150,12 @@ Plan mode => Opus / Execution mode => Sonnet 자동 전환
 
 ### 주입되는 지시
 
+- Claude Code 2.1.318 기준. 2026-11-05에 세션 컨텍스트와 실행 파일 문자열로 직접 확인한 내용
 - 컨텍스트에 `# Language` 절로 들어감
-- 설명, 주석, 사용자와의 모든 소통을 그 언어로 쓰고 기술 용어와 코드 식별자는 원문을 유지하라는 지시
-  - "사용자와의 모든 소통"에 작업 중간의 진행 안내도 포함
+- 설명, 주석, 사용자와의 소통(`communications with the user`)을 모두 그 언어로 쓰라는 지시
+- 기술 용어와 코드 식별자는 원문 유지
 - 해당 언어의 철자와 발음 구별 기호를 정확히 지키라는 문장이 뒤에 붙음
-- 2026-11-05, Claude Code 2.1.318 기준
-
-> "Always respond in korean. Use korean for all explanations, comments, and communications with the user. Technical terms and code identifiers should remain in their original form."
->
-> 출처: Claude Code 2.1.318 세션 컨텍스트의 `# Language` 절
+- 설정을 지우면 사용자의 언어에 맞추라는 지시로 바뀜
 
 ### 설정 방법
 
@@ -180,10 +175,13 @@ Plan mode => Opus / Execution mode => Sonnet 자동 전환
 | 구분 | `language` 설정 | `CLAUDE.md` 규칙 |
 | --- | --- | --- |
 | 용도 | 응답 언어 전용 | 상시 지시 전반 |
-| 들어가는 위치 | 하네스가 넣는 `# Language` 절 | 사용자 메시지로 전달되는 메모리 |
-| 작성 분량 | 값 한 줄 | 규칙 문장을 직접 작성 |
+| 들어가는 위치 | 하네스가 넣는 `# Language` 절 | CLAUDE.md 파일 내용 |
 
-- CLAUDE.md에도 언어 규칙을 함께 쓰라는 커뮤니티 의견이 있으나 공식 안내는 아님
+- 공식 문서는 상시 지시를 넣는 곳으로 CLAUDE.md를 안내함
+
+> "To give Claude standing instructions, use `CLAUDE.md` files or the `--append-system-prompt` flag."
+>
+> 출처: [Settings files and precedence](https://code.claude.com/docs/en/settings)
 
 ## 참고자료
 
