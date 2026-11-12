@@ -1,4 +1,12 @@
 # MCP(Model Context Protocol)
+
+## 목차
+- [구조](#구조)
+- [설정](#설정)
+  - [codex](#codex)
+- 하위 문서
+  - [Slack](Slack.md)
+
 앤트로픽(Anthropic)이 새로운 오픈소스 표준인 모델 컨텍스트 프로토콜
 
 ## 구조
