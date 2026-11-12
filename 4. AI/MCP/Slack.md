@@ -14,8 +14,11 @@ Slack 커넥터의 DM과 이미지 읽기
 > claude.ai에 등록해 쓰는 원격 MCP 서버. Claude Code는 이를 MCP 서버 출처 중 하나로 불러와 `/mcp` 목록에 `claude.ai Slack`처럼 표시함.
 
 - Slack 공식 MCP 서버(`https://mcp.slack.com/mcp`)를 Claude 커넥터로 연결한 것.
-- 로그인한 사용자의 user token 권한으로 동작. 본인이 참여한 대화만 읽음.
+- 로그인한 사용자의 user token 권한으로 동작. DM은 본인이 참여한 대화만 읽음.
 - 워크스페이스 관리자가 커넥터 승인 시 뺀 scope의 기능은 쓸 수 없음.
+
+> 💡 user token과 scope란?
+> user token은 Slack 앱이 사용자 대신 API를 부를 때 쓰는 토큰. scope는 그 토큰에 허용한 권한 단위(`im:history` 등)로, OAuth 동의 화면에서 사용자가 승인함.
 
 ## DM 읽기
 
@@ -32,7 +35,9 @@ Slack 커넥터의 DM과 이미지 읽기
 ## DM 속 이미지 읽기
 
 - 파일 읽기 도구 `slack_read_file`(scope `files:read`)로 읽음.
-  - 공유된 파일의 메타데이터와 내용을 가져오는 도구. 이미지도 Claude가 보는 이미지로 돌려줌.
+  - 입력은 파일 ID. DM을 읽은 `slack_read_channel`, `slack_read_thread`나 검색 결과에 담겨 나옴.
+  - 공유된 파일의 메타데이터와 내용을 가져오는 도구. 이미지는 이미지 데이터로 돌려줘 Claude가 직접 봄.
+    - Slack MCP의 `slack_read_file` 도구 설명: 파일 ID는 대화 읽기와 검색 도구에서 얻고, 이미지 같은 바이너리는 base64로 반환.
 - 메시지의 이미지 URL을 WebFetch로 여는 방식은 불가.
   - Slack에 올린 파일은 `Authorization: Bearer` 헤더에 토큰을 실어야 내려받을 수 있기 때문.
 
