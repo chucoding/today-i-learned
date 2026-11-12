@@ -13,6 +13,7 @@
   - [LLM Wiki](LLMWiki/README.md)
   - [MCP](MCP/README.md)
     - [Slack](MCP/Slack.md)
+  - [모델](모델.md)
   - [SKILLS](SKILLS/README.md)
   - [vectorDB](vectorDB.md)
   - [랭체인](랭체인/README.md)
