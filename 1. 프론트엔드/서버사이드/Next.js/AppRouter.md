@@ -82,6 +82,20 @@ app/
   - 화면은 HTML을 직접 응답하거나 303 redirect로 page 경로에 보냄.
 - 자기 앱 안의 폼은 Server Action으로도 처리 가능([8. 상태 변경: Server Actions](#8-상태-변경-server-actions))
 
+POST로 화면을 띄우는 방식 비교
+
+| 방식 | 얻는 것 | 잃는 것 | 맞는 경우 |
+| --- | --- | --- | --- |
+| `route.ts`가 HTML 직접 응답 | 다른 오리진의 폼 POST를 그대로 받음. 브라우저로 나가는 JS를 직접 정함 | layout, 스트리밍, CSP nonce 자동 부착 같은 page 기능. HTML 이스케이프도 직접 처리 | 인쇄 문서처럼 앱 화면이 아닌 문서 |
+| `route.ts`에서 저장 후 303 redirect로 page (PRG) | page 기능 전부. 새로고침해도 POST 재전송 없음 | 본문을 둘 저장소(DB, KV)와 수명 관리 | 결과 화면을 다시 열거나 공유할 때 |
+| Server Action | 함수 호출 형태와 타입 유지 | 다른 호스트에서 보낸 POST는 처리 불가 | 자기 앱 안의 폼 |
+
+- Route Handler 문서는 HTML 응답이 아니라 화면이 아닌 응답(RSS, sitemap 등) 용도로 소개함.
+  - Next.js route 문서: `Non-UI Responses` 절
+- Server Action은 요청의 `Origin`과 `Host`가 다르면 요청을 중단함. 프록시나 CDN 도메인은 `serverActions.allowedOrigins`로 허용
+  - Next.js Data Security 문서: Server Action은 그 페이지와 같은 호스트에서만 호출 가능
+- nonce 자동 부착 대상은 [CSP](../../HTML/CSP.md) 참고
+
 ### 라우트 분기 기준
 
 - 파일 기반 라우팅은 URL 경로로만 분기함.
@@ -708,5 +722,7 @@ X. 서버에서 HTML로 렌더링된 뒤 브라우저에서 hydration됨. `'use 
 | TanStack Query Advanced SSR | https://tanstack.com/query/latest/docs/framework/react/guides/advanced-ssr |
 | page와 route.ts 충돌 규칙 | [https://nextjs.org/docs/app/getting-started/route-handlers](https://nextjs.org/docs/app/getting-started/route-handlers) |
 | page가 받는 props | [https://nextjs.org/docs/app/api-reference/file-conventions/page](https://nextjs.org/docs/app/api-reference/file-conventions/page) |
+| Route Handler의 화면이 아닌 응답 용도 | [https://nextjs.org/docs/app/api-reference/file-conventions/route#non-ui-responses](https://nextjs.org/docs/app/api-reference/file-conventions/route#non-ui-responses) |
+| Server Action의 Origin과 Host 비교 | [https://nextjs.org/docs/app/guides/data-security](https://nextjs.org/docs/app/guides/data-security) |
 | 라우트 단위 코드 분할 | [https://nextjs.org/docs/app/glossary#code-splitting](https://nextjs.org/docs/app/glossary#code-splitting) |
 | import() 경로와 번들 범위 | [https://webpack.js.org/api/module-methods/#dynamic-expressions-in-import](https://webpack.js.org/api/module-methods/#dynamic-expressions-in-import) |
