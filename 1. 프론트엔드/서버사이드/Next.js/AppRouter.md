@@ -88,12 +88,12 @@ POST로 화면을 띄우는 방식 비교
 | --- | --- | --- | --- |
 | `route.ts`가 HTML 직접 응답 | 다른 오리진의 폼 POST를 그대로 받음. 브라우저로 나가는 JS를 직접 정함 | layout, 스트리밍, CSP nonce 자동 부착 같은 page 기능. HTML 이스케이프도 직접 처리 | 인쇄 문서처럼 앱 화면이 아닌 문서 |
 | `route.ts`에서 저장 후 303 redirect로 page (PRG) | page 기능 전부. 새로고침해도 POST 재전송 없음 | 본문을 둘 저장소(DB, KV)와 수명 관리 | 결과 화면을 다시 열거나 공유할 때 |
-| Server Action | 함수 호출 형태와 타입 유지 | 다른 호스트에서 보낸 POST는 처리 불가 | 자기 앱 안의 폼 |
+| Server Action | 함수 호출 형태와 타입 유지 | 허용 목록(`allowedOrigins`) 밖 호스트에서 보낸 POST는 중단 | 자기 앱 안의 폼 |
 
 - Route Handler 문서는 HTML 응답이 아니라 화면이 아닌 응답(RSS, sitemap 등) 용도로 소개함.
   - Next.js route 문서: `Non-UI Responses` 절
-- Server Action은 요청의 `Origin`과 `Host`가 다르면 요청을 중단함. 프록시나 CDN 도메인은 `serverActions.allowedOrigins`로 허용
-  - Next.js Data Security 문서: Server Action은 그 페이지와 같은 호스트에서만 호출 가능
+- Server Action은 요청의 `Origin`과 `Host`가 다르면 요청을 중단함. 리버스 프록시나 CDN 도메인은 `serverActions.allowedOrigins`로 허용
+  - Next.js Data Security 문서: 기본값은 그 페이지와 같은 호스트에서만 호출 가능. `allowedOrigins`로 허용 목록 확장
 - nonce 자동 부착 대상은 [CSP](../../HTML/CSP.md) 참고
 
 ### 라우트 분기 기준
