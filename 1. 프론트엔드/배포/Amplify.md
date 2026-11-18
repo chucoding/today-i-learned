@@ -2,6 +2,14 @@
 
 풀스택(Full Stack) 애플리케이션 개발을 지원하는 개발 플랫폼
 
+- [빌드 설정 파일명은 amplify.yml 고정](#빌드-설정-파일명은-amplifyyml-고정)
+- [도메인 설정](#도메인-설정)
+- [스토리북](#스토리북)
+- [단일레포 구성 (App + 스토리북)](#단일레포-구성-app--스토리북)
+- [브랜치별 환경변수](#브랜치별-환경변수)
+- [모노레포 구성](#모노레포-구성)
+- [참고자료](#참고자료)
+
 - version -&gt; frontend -&gt; phases -&gt; artifacts -&gt; cache 구조
 - pnpm 사용시 전역 설치하되 저장소 버전 10.15.1로 고정
 - SSR 실행 환경(compute)의 응답 크기 한도는 [Amplify Compute](./Amplify%20Compute.md) 참고
