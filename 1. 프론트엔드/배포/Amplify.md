@@ -4,6 +4,7 @@
 
 - version -&gt; frontend -&gt; phases -&gt; artifacts -&gt; cache 구조
 - pnpm 사용시 전역 설치하되 저장소 버전 10.15.1로 고정
+- SSR 실행 환경(compute)의 응답 크기 한도는 [Amplify Compute](./Amplify%20Compute.md) 참고
 
 ## 빌드 설정 파일명은 amplify.yml 고정
 
