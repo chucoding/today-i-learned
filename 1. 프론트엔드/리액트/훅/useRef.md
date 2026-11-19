@@ -1,8 +1,11 @@
 # useRef
 
-> - [useRef - React](https://react.dev/reference/react/useRef)
-> - [Referencing Values with Refs - React](https://react.dev/learn/referencing-values-with-refs)
-> - [Escape Hatches - React](https://react.dev/learn/escape-hatches)
+- [왜 쓰는가](#왜-쓰는가)
+- [언제 안 쓰는가](#언제-안-쓰는가)
+- [current 사용 규칙](#current-사용-규칙)
+- [비동기 콜백의 최신 값](#비동기-콜백의-최신-값)
+- [React 19 타입 변경](#react-19-타입-변경)
+- [참고자료](#참고자료)
 
 렌더링에 필요 없는 값을 `current` 하나에 담아 두는 훅. `current`를 바꿔도 리렌더링이 일어나지 않고, 리렌더링이 되어도 같은 객체가 유지됨.
 
@@ -45,7 +48,44 @@ if (playerRef.current === null) {
 - DOM ref의 `current`는 첫 렌더 시점에 `null`이고 DOM이 붙은 뒤부터 값이 들어옴
 - Strict Mode에서는 개발 중 ref 객체가 두 번 생성됨
 
+## 비동기 콜백의 최신 값
+
+- 콜백은 자신이 만들어진 렌더의 props와 state를 클로저로 붙잡음. `.then()`, `setTimeout` 안에서 읽으면 응답 시점이 아니라 클릭 시점 값
+  - state는 렌더마다 고정된 스냅샷이라 state로 바꿔도 같은 문제. 리렌더만 늘어남
+- 렌더에는 state(또는 props), 나중에 읽을 콜백에는 ref로 같은 값을 둘 다 둠
+  - ref는 비동기 작업 안에서도 언제든 `current`로 최신 값을 읽을 수 있음
+  - 커뮤니티에서 latest ref 패턴이라 부름. react.dev는 이름 없이 Referencing Values with Refs의 챌린지 "Read the latest state"로 다룸
+
+> "State works like a snapshot, so you can’t read the latest state from an asynchronous operation like a timeout. However, you can keep the latest input text in a ref."
+>
+> 출처: [Referencing Values with Refs](https://react.dev/learn/referencing-values-with-refs)
+
+```tsx
+function Tab({ isActive }: { isActive: boolean }) {
+  const isActiveRef = useRef(isActive)
+  useEffect(() => {
+    isActiveRef.current = isActive // 렌더 밖에서 갱신
+  }, [isActive])
+
+  function handleClick() {
+    fetch('/api/check').then(() => {
+      if (!isActiveRef.current) return // 응답 시점의 값
+      navigate('/next')
+    })
+  }
+  // ...
+}
+```
+
 ## React 19 타입 변경
 
 - `useRef`에 인자가 필수가 됨 (`useRef()`는 타입 오류, `useRef(undefined)`는 통과)
 - `MutableRefObject`가 사라지고 `RefObject` 하나로 합쳐져, `useRef<T>(null)`로 만든 ref도 `current`를 수정할 수 있음
+
+## 참고자료
+
+| TITLE | URL |
+|---|---|
+| useRef 주의 사항과 current 사용 규칙 | [https://react.dev/reference/react/useRef](https://react.dev/reference/react/useRef) |
+| state와 ref 비교, 비동기 콜백에서 최신 값 읽기 | [https://react.dev/learn/referencing-values-with-refs](https://react.dev/learn/referencing-values-with-refs) |
+| ref와 effect를 비상구로 묶은 챕터 | [https://react.dev/learn/escape-hatches](https://react.dev/learn/escape-hatches) |
