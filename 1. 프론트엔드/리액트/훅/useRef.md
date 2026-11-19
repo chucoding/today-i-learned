@@ -51,14 +51,18 @@ if (playerRef.current === null) {
 ## 비동기 콜백의 최신 값
 
 - 콜백은 자신이 만들어진 렌더의 props와 state를 클로저로 붙잡음. `.then()`, `setTimeout` 안에서 읽으면 응답 시점이 아니라 클릭 시점 값
-  - state는 렌더마다 고정된 스냅샷이라 state로 바꿔도 같은 문제. 리렌더만 늘어남
+  - 그 값을 ref 대신 state로 두어도 콜백은 만들어진 렌더의 state 스냅샷을 읽으므로 같은 문제. 리렌더만 늘어남
 - 렌더에는 state(또는 props), 나중에 읽을 콜백에는 ref로 같은 값을 둘 다 둠
-  - ref는 비동기 작업 안에서도 언제든 `current`로 최신 값을 읽을 수 있음
-  - 커뮤니티에서 latest ref 패턴이라 부름. react.dev는 이름 없이 Referencing Values with Refs의 챌린지 "Read the latest state"로 다룸
+  - ref는 콜백이 실행되는 시점의 `current`를 읽으므로 클로저에 갇히지 않음
+  - `current` 갱신은 렌더 중이 아니라 effect에서 하므로, 그 effect가 실행된 뒤부터 새 값
 
 > "State works like a snapshot, so you can’t read the latest state from an asynchronous operation like a timeout. However, you can keep the latest input text in a ref."
 >
 > 출처: [Referencing Values with Refs](https://react.dev/learn/referencing-values-with-refs)
+
+- 커뮤니티에서 부르는 이름은 latest ref 패턴
+  - Epic React: Kent C. Dodds의 "The Latest Ref Pattern in React".
+  - react.dev는 이 이름을 쓰지 않고 Referencing Values with Refs의 챌린지 "Read the latest state"로 다룸
 
 ```tsx
 function Tab({ isActive }: { isActive: boolean }) {
@@ -89,3 +93,4 @@ function Tab({ isActive }: { isActive: boolean }) {
 | useRef 주의 사항과 current 사용 규칙 | [https://react.dev/reference/react/useRef](https://react.dev/reference/react/useRef) |
 | state와 ref 비교, 비동기 콜백에서 최신 값 읽기 | [https://react.dev/learn/referencing-values-with-refs](https://react.dev/learn/referencing-values-with-refs) |
 | ref와 effect를 비상구로 묶은 챕터 | [https://react.dev/learn/escape-hatches](https://react.dev/learn/escape-hatches) |
+| latest ref 패턴이라는 이름 | [https://epicreact.dev/the-latest-ref-pattern-in-react/](https://epicreact.dev/the-latest-ref-pattern-in-react/) |
