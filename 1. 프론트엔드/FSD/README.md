@@ -7,6 +7,7 @@
 - [shared 레이어](shared.md)
 - [pages 레이어의 상태관리](pages.md)
 - [model 세그먼트](model.md)
+- [상수 배치](constants.md)
 - [레이아웃](layout.md)
 - [쿼리 키 위치](query-key.md)
 - [TanStack Query](TanStackQuery.md)
