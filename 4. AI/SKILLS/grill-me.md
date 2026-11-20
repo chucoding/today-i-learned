@@ -2,7 +2,7 @@ Matt Pocock의 grilling 스킬
 
 ## 목차
 
-- [grill-me](#grill-me-1)
+- [grill-me](#grill-me)
 - [grill-with-docs](#grill-with-docs)
 - [wayfinder](#wayfinder)
 - [선택 기준](#선택-기준)
