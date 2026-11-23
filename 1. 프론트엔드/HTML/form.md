@@ -35,6 +35,7 @@ form안에 `<input type="submit" />`이 있으면 해당 요소로 폼 제출 �
   - MDN CORS: 단순 요청의 `Content-Type`은 `application/x-www-form-urlencoded`, `multipart/form-data`, `text/plain`만 허용
   - `application/json`을 다른 출처로 보내면 preflight 대상
 - `method="post"`면 데이터가 URL이 아니라 본문에 실려 URL 길이 제한을 피함.
+- 폼 POST 응답이 곧 문서가 되는 이유와 대안은 [네비게이션](./네비게이션.md) 참고
 
 > 💡 preflight란?
 > 교차 출처 요청을 보내기 전에 브라우저가 `OPTIONS` 요청으로 서버에 허용 여부를 먼저 묻는 요청. 단순 요청은 이 과정 없이 바로 보냄.
