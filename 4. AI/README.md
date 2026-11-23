@@ -9,6 +9,7 @@
 - 하위 문서
   - [AI 도구](AI%20도구/README.md)
   - [ChatGPT](ChatGPT.md)
+  - [ego lite](ego%20lite.md)
   - [Claude](Claude.md)
   - [LLM Wiki](LLMWiki/README.md)
   - [MCP](MCP/README.md)
