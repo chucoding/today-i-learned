@@ -20,6 +20,8 @@
 ## 허용 판단
 
 - 브라우저가 요청에 `Origin` 헤더를 붙이고, 응답의 `Access-Control-Allow-Origin`과 비교
+  - 응답 값이 요청 `Origin`과 같거나 `*`이면 통과. 서버는 허용 목록에서 요청 출처를 찾아 그 값을 내려줌.
+- 허용되지 않으면 브라우저가 응답을 스크립트에 넘기지 않고 CORS 오류로 처리
 - 비교 대상은 요청을 보낸 페이지의 출처와 응답 헤더뿐
   - 서버 주소가 그대로면 그 뒤의 인프라 교체는 브라우저에 보이지 않음
   - 새 인프라도 같은 `Access-Control-Allow-Origin`을 내려줘야 함. 헤더는 서버 쪽(애플리케이션, Nginx, 게이트웨이)이 붙이기 때문.
@@ -31,8 +33,8 @@
 >💡 cors는 무조건 백엔드(Nginx, WAS 등)에서 해결해야한다.
 
 ### 해결방법1 : 헤더 조작
-서버에서 응답 헤더에 ACAO(Access-Controll-Allow-Origin)을 요청 도메인으로 허용<br/>
-(CORS 통과 조건 : Requesst Header Origin = Response Header Acess-Control-Allow-Origin)
+서버에서 응답 헤더에 ACAO(Access-Control-Allow-Origin)을 요청 도메인으로 허용<br/>
+(CORS 통과 조건 : Request Header Origin = Response Header Access-Control-Allow-Origin)
 
 ### 해결방법2 : proxy 서버
 
